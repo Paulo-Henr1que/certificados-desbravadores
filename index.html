@@ -92,6 +92,33 @@
     .capa p.sub{ font-size:16.5px }
   }
   @media (prefers-reduced-motion:reduce){ .emblema{ animation:none } }
+
+  /* ─── animações ─── */
+  html{ scroll-behavior:smooth }
+  #como{ scroll-margin-top:20px }
+  .entra{ opacity:0; transform:translateY(22px); animation:sobe .8s cubic-bezier(.2,.7,.2,1) forwards }
+  .d1{ animation-delay:.08s } .d2{ animation-delay:.2s } .d3{ animation-delay:.32s } .d4{ animation-delay:.44s }
+  @keyframes sobe{ to{ opacity:1; transform:none } }
+  .emblema.entra{ animation:aparece 1s cubic-bezier(.2,.7,.2,1) .15s forwards, flutua 6s ease-in-out 1.2s infinite; transform:scale(.85) rotate(-6deg) }
+  @keyframes aparece{ to{ opacity:1; transform:none } }
+  .rev{ opacity:0; transform:translateY(28px); transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1) }
+  .rev.vis{ opacity:1; transform:none }
+  .passos li.rev:nth-child(2){ transition-delay:.12s } .passos li.rev:nth-child(3){ transition-delay:.24s }
+  .bt-ouro svg{ transition:transform .2s }
+  .bt-ouro:hover svg{ transform:translateX(4px) }
+  .passos li:hover .n{ transform:scale(1.1) rotate(-6deg) }
+  .n{ transition:transform .25s cubic-bezier(.2,.7,.2,1) }
+  /* brilho que passa no botão principal */
+  .bt-ouro{ position:relative; overflow:hidden }
+  .bt-ouro::after{ content:''; position:absolute; top:0; left:-60%; width:40%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:brilho 4s ease-in-out 1.6s infinite }
+  @keyframes brilho{ 0%{ left:-60% } 30%,100%{ left:130% } }
+  /* fundo da capa com estrelas discretas */
+  .capa::before{ content:''; position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.18) 1px, transparent 1.5px); background-size:34px 34px; mask-image:linear-gradient(180deg,#000,transparent 85%); pointer-events:none }
+  @media (prefers-reduced-motion:reduce){
+    html{ scroll-behavior:auto }
+    .entra,.rev,.emblema.entra{ opacity:1; transform:none; animation:none; transition:none }
+    .bt-ouro::after{ display:none }
+  }
 </style>
 </head>
 <body>
@@ -101,10 +128,10 @@
 <header class="capa">
   <div class="wrap capa-in">
     <div>
-      <p class="selo">Clube de Desbravadores</p>
-      <h1>Certificados de especialidade <span>em minutos</span></h1>
-      <p class="sub">Gere os certificados do seu clube um por um ou centenas de uma vez, no modelo oficial, prontos para imprimir.</p>
-      <div class="acoes">
+      <p class="selo entra d1">Clube de Desbravadores</p>
+      <h1 class="entra d2">Certificados de especialidade <span>em minutos</span></h1>
+      <p class="sub entra d3">Gere os certificados do seu clube um por um ou centenas de uma vez, no modelo oficial, prontos para imprimir.</p>
+      <div class="acoes entra d4">
         <a class="bt bt-ouro" href="gerador.html">
           Começar a gerar
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg>
@@ -112,29 +139,29 @@
         <a class="bt bt-vazio" href="#como">Como funciona</a>
       </div>
     </div>
-    <img class="emblema" src="assets/desbravadores.svg" alt="Emblema do Clube de Desbravadores" width="300" height="304">
+    <img class="emblema entra" src="assets/desbravadores.svg" alt="Emblema do Clube de Desbravadores" width="300" height="304">
   </div>
 </header>
 
 <main>
   <section class="sec" id="como">
     <div class="wrap">
-      <div class="sec-topo">
+      <div class="sec-topo rev">
         <h2>Três passos, do cadastro à impressão</h2>
         <p>Pensado para quem precisa entregar muitos certificados de uma vez, sem montar um por um.</p>
       </div>
       <ol class="passos">
-        <li>
+        <li class="rev">
           <span class="n">1</span>
           <h3>Cadastre as especialidades</h3>
-          <p>Nome, cor da moldura e a imagem do botão. Uma vez só, e vale para todos os certificados daquela especialidade.</p>
+          <p>Nome, cor da moldura e a imagem do boton. Uma vez só, e vale para todos os certificados daquela especialidade.</p>
         </li>
-        <li>
+        <li class="rev">
           <span class="n">2</span>
           <h3>Cole a lista de nomes</h3>
           <p>Um por linha, ou a planilha inteira com especialidade e nome. Repetidos são ignorados sozinhos.</p>
         </li>
-        <li>
+        <li class="rev">
           <span class="n">3</span>
           <h3>Baixe e imprima</h3>
           <p>PDF com 1, 2 ou 3 certificados por folha, um arquivo por especialidade. Ou as imagens soltas em PNG.</p>
@@ -145,7 +172,7 @@
 
   <section class="sec final">
     <div class="wrap">
-      <div class="caixa">
+      <div class="caixa rev">
         <h2>Pronto para reconhecer o seu clube?</h2>
         <p>Tudo roda no seu navegador. Nenhum nome é enviado para servidor nenhum.</p>
         <a class="bt bt-ouro" href="gerador.html">Abrir o gerador</a>
@@ -161,5 +188,13 @@
 </footer>
 <script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 
+<script>
+(function(){
+  var r=[].slice.call(document.querySelectorAll('.rev'));
+  if(!('IntersectionObserver' in window)){ r.forEach(function(e){e.classList.add('vis')}); return }
+  var o=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vis'); o.unobserve(e.target) } }) },{rootMargin:'0px 0px -10% 0px'});
+  r.forEach(function(e){ o.observe(e) });
+})();
+</script>
 </body>
 </html>

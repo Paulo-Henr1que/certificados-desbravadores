@@ -303,3 +303,34 @@ textarea{
 .credito{ margin-bottom:6px; color:var(--tinta-2) }
 .credito a{ color:var(--azul); font-weight:600; text-decoration:none }
 .credito a:hover{ text-decoration:underline }
+
+/* ═══════════ organização no computador ═══════════ */
+/* duas colunas: à esquerda o que se preenche, à direita a prévia e a
+   saída, fixas enquanto se rola o cadastro */
+@media (min-width:1100px){
+  .wrap{ max-width:1280px }
+  .principal{ grid-template-columns:minmax(0,1fr) 460px; align-items:start; column-gap:26px }
+  #p-especialidades, #p-lotes{ grid-column:1 }
+  #p-gerar{ grid-column:2; grid-row:1 / span 2; position:sticky; top:86px; max-height:calc(100vh - 100px); overflow:auto }
+  #p-gerar .gerar-grade{ grid-template-columns:1fr; gap:16px }
+  #p-gerar .bloco-topo{ margin-bottom:16px }
+  #p-gerar .saida{ padding:16px }
+  .lista-esp{ grid-template-columns:repeat(auto-fill,minmax(230px,1fr)) }
+}
+
+/* boton: área oval, no formato em que ele aparece no certificado */
+.form-esp{ grid-template-columns:1fr auto; align-items:center }
+.soltar{
+  width:210px; aspect-ratio:1.18; min-height:0; padding:16px;
+  border-radius:50%; justify-self:center; align-self:center;
+  background:radial-gradient(circle at 50% 40%, #fff, #EEF3F9);
+}
+.soltar img{ width:118px; height:118px }
+.soltar-txt{ font-size:12.5px }
+.soltar-txt b{ font-size:14px }
+.soltar.cheio .soltar-txt{ display:none }
+.soltar.cheio::after{ content:'Trocar'; font-size:12px; color:var(--azul-3); font-weight:600 }
+@media (max-width:720px){
+  .form-esp{ grid-template-columns:1fr }
+  .soltar{ width:190px }
+}

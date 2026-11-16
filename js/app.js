@@ -1,7 +1,7 @@
 /* Gerador de Certificados · Clube de Desbravadores
    Tudo roda no navegador. Nada é enviado para servidor.
    Os textos e lotes ficam no localStorage; as imagens, no IndexedDB
-   (localStorage estoura com poucos botões de especialidade). */
+   (localStorage estoura com poucos botons de especialidade). */
 (function () {
   'use strict';
 
@@ -98,7 +98,7 @@
     return (s || '').replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
   }
 
-  /* reduz a imagem enviada: 700 certificados com botões grandes
+  /* reduz a imagem enviada: 700 certificados com botons grandes
      entopem a memória e o arquivo final */
   function prepararImagem (arquivo, ladoMax) {
     return new Promise(function (ok, erro) {
@@ -318,7 +318,7 @@
     texto(ctx, '(Diretor)', 0.536 * W, 0.942 * H,
       Math.round(0.058 * H), '400', tinta, 'center');
 
-    // oval do botão da especialidade
+    // oval do boton da especialidade
     var cx = 0.834 * W, cy = 0.600 * H, rx = 0.103 * W, ry = 0.222 * H;
     ctx.save();
     ctx.beginPath();
@@ -397,7 +397,7 @@
         mini = img;
       } else {
         mini.className = 'mini-vazio';
-        mini.textContent = 'sem botão';
+        mini.textContent = 'sem boton';
       }
 
       var bol = document.createElement('span');
@@ -644,7 +644,7 @@
       meio.appendChild(b); meio.appendChild(s);
 
       var tag = document.createElement('span');
-      if (e && !e.imgId) { tag.className = 'etiqueta falta'; tag.textContent = 'sem botão' }
+      if (e && !e.imgId) { tag.className = 'etiqueta falta'; tag.textContent = 'sem boton' }
       else { tag.className = 'etiqueta'; tag.textContent = 'pronto' }
 
       var acoes = document.createElement('div');
@@ -739,7 +739,7 @@
       Object.keys(porEsp).length + '</b> especialidades · <b>' + criadas +
       '</b> criadas agora' +
       (repetidos.length ? ' · <b>' + repetidos.length + '</b> repetidos ignorados' : '') +
-      (criadas ? '<br>Defina a cor e o botão das novas especialidades no passo 1.' : '');
+      (criadas ? '<br>Defina a cor e o boton das novas especialidades no passo 1.' : '');
 
     id('massa-txt').value = '';
     id('conta-massa').textContent = '0 linhas válidas';
