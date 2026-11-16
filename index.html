@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Certificados · Desbravadores</title>
+<meta name="description" content="Gerador de certificados de especialidade para clubes de Desbravadores. Lotes em massa, PDF e PNG.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/estilo.css?v=1">
+</head>
+<body>
+
+<header class="topo">
+  <div class="wrap topo-in">
+    <div class="marca">
+      <svg viewBox="0 0 40 40" aria-hidden="true" class="marca-sim">
+        <path d="M20 3 6 11v12c0 8 6 13 14 14 8-1 14-6 14-14V11z" fill="var(--dourado)"/>
+        <path d="M20 8 11 13v9.4c0 5.6 4 9.2 9 10.2 5-1 9-4.6 9-10.2V13z" fill="var(--azul)"/>
+        <path d="M20 13.5 16 23h8z" fill="var(--vermelho)"/>
+        <path d="M13 24.5h14v2.2H13z" fill="#fff"/>
+      </svg>
+      <span>
+        <b>Certificados</b>
+        <small>Clube de Desbravadores</small>
+      </span>
+    </div>
+    <nav class="topo-nav">
+      <span class="placar" id="placar">0 certificados</span>
+      <button class="bt bt-linha" id="bt-backup">Backup</button>
+      <button class="bt bt-ouro" id="bt-gerar-topo">Gerar</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap principal">
+
+  <!-- ═══════════ 1 · especialidades ═══════════ -->
+  <section class="bloco" id="p-especialidades">
+    <div class="bloco-topo">
+      <h2><span class="passo">1</span>Especialidades</h2>
+      <p>Cadastre uma vez e reaproveite em quantos lotes quiser. A cor e o botão ficam salvos junto.</p>
+    </div>
+
+    <form class="form-esp" id="form-esp">
+      <label class="campo">
+        <span>Nome da especialidade</span>
+        <input type="text" id="esp-nome" placeholder="Ecologia" required maxlength="60">
+      </label>
+
+      <label class="campo campo-cor">
+        <span>Cor da moldura</span>
+        <span class="cor-caixa">
+          <input type="color" id="esp-cor" value="#08A008">
+          <input type="text" id="esp-cor-hex" value="#08A008" maxlength="7" spellcheck="false" aria-label="Cor em hexadecimal">
+        </span>
+      </label>
+
+      <label class="campo">
+        <span>Botão da especialidade <small>PNG ou JPG</small></span>
+        <input type="file" id="esp-img" accept="image/png,image/jpeg">
+      </label>
+
+      <label class="campo campo-largo">
+        <span>Logotipo da igreja <small>opcional, vale para todos os certificados. Sem envio, usamos o símbolo desenhado.</small></span>
+        <input type="file" id="logo-img" accept="image/png,image/jpeg,image/svg+xml">
+      </label>
+
+      <div class="form-pe">
+        <button type="submit" class="bt bt-azul" id="bt-salvar-esp">Adicionar especialidade</button>
+        <button type="button" class="bt bt-linha" id="bt-cancelar-esp" hidden>Cancelar edição</button>
+      </div>
+    </form>
+
+    <ul class="lista-esp" id="lista-esp"></ul>
+    <p class="vazio" id="esp-vazio">Nenhuma especialidade cadastrada ainda.</p>
+  </section>
+
+  <!-- ═══════════ 2 · lotes ═══════════ -->
+  <section class="bloco" id="p-lotes">
+    <div class="bloco-topo">
+      <h2><span class="passo">2</span>Lotes</h2>
+      <p>Um lote é uma especialidade com a sua lista de desbravadores. Monte quantos precisar.</p>
+    </div>
+
+    <div class="abas" role="tablist">
+      <button class="aba on" data-aba="manual" role="tab" aria-selected="true">Montar um lote</button>
+      <button class="aba" data-aba="massa" role="tab" aria-selected="false">Importar lista em massa</button>
+    </div>
+
+    <!-- lote manual -->
+    <div class="painel" id="painel-manual">
+      <form class="form-lote" id="form-lote">
+        <label class="campo">
+          <span>Especialidade</span>
+          <select id="lote-esp" required></select>
+        </label>
+
+        <fieldset class="campo campo-data">
+          <legend>Data</legend>
+          <label class="radio"><input type="radio" name="tipo-data" value="branco" checked> Deixar em branco para preencher à mão</label>
+          <label class="radio"><input type="radio" name="tipo-data" value="ano"> Só o ano</label>
+          <label class="radio"><input type="radio" name="tipo-data" value="cheia"> Data completa</label>
+          <div class="data-campos">
+            <input type="text" id="data-dia" placeholder="dd" maxlength="2" inputmode="numeric" disabled>
+            <input type="text" id="data-mes" placeholder="mm" maxlength="2" inputmode="numeric" disabled>
+            <input type="text" id="data-ano" placeholder="aaaa" maxlength="4" inputmode="numeric" value="2026">
+          </div>
+        </fieldset>
+
+        <label class="campo campo-largo">
+          <span>Desbravadores <small>um nome por linha</small></span>
+          <textarea id="lote-nomes" rows="7" placeholder="Miguel Félix&#10;Ana Clara Souza&#10;Pedro Henrique Lima"></textarea>
+        </label>
+
+        <div class="form-pe">
+          <span class="conta" id="conta-nomes">0 nomes</span>
+          <button type="submit" class="bt bt-azul">Adicionar lote</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- importação em massa -->
+    <div class="painel" id="painel-massa" hidden>
+      <p class="dica">
+        Cole uma linha por desbravador, no formato <code>Especialidade ; Nome</code>.
+        Aceita <code>;</code>, <code>,</code> ou tabulação (dá para colar direto do Excel).
+        As especialidades que ainda não existirem são criadas na hora, e você escolhe a cor e o botão depois.
+      </p>
+      <textarea id="massa-txt" rows="10" placeholder="Ecologia; Miguel Félix&#10;Ecologia; Ana Clara Souza&#10;Répteis; Pedro Henrique Lima&#10;Nós e Amarras; João Vitor"></textarea>
+      <div class="form-pe">
+        <label class="bt bt-linha arquivo">
+          Carregar arquivo CSV
+          <input type="file" id="massa-csv" accept=".csv,.txt,text/csv,text/plain" hidden>
+        </label>
+        <span class="conta" id="conta-massa">0 linhas</span>
+        <button type="button" class="bt bt-azul" id="bt-massa">Criar lotes</button>
+      </div>
+      <div class="resumo" id="resumo-massa" hidden></div>
+    </div>
+
+    <ul class="lista-lotes" id="lista-lotes"></ul>
+    <p class="vazio" id="lotes-vazio">Nenhum lote montado ainda.</p>
+  </section>
+
+  <!-- ═══════════ 3 · conferir e gerar ═══════════ -->
+  <section class="bloco" id="p-gerar">
+    <div class="bloco-topo">
+      <h2><span class="passo">3</span>Conferir e gerar</h2>
+      <p>A prévia mostra o primeiro certificado do lote selecionado.</p>
+    </div>
+
+    <div class="gerar-grade">
+      <div class="previa-area">
+        <div class="previa-barra">
+          <select id="previa-lote" aria-label="Lote da prévia"></select>
+          <button class="bt bt-linha bt-p" id="bt-png-um">Baixar este PNG</button>
+        </div>
+        <div class="previa-moldura">
+          <canvas id="previa" width="2480" height="918" aria-label="Prévia do certificado"></canvas>
+        </div>
+      </div>
+
+      <div class="saida">
+        <h3>Saída</h3>
+
+        <label class="campo">
+          <span>Certificados por página</span>
+          <select id="por-pagina">
+            <option value="2" selected>2 por página (A4 deitada)</option>
+            <option value="1">1 por página (A4 deitada)</option>
+            <option value="3">3 por página (A4 em pé)</option>
+          </select>
+        </label>
+
+        <label class="campo">
+          <span>Qualidade</span>
+          <select id="qualidade">
+            <option value="alta">Alta — para imprimir</option>
+            <option value="boa" selected>Boa — equilíbrio</option>
+            <option value="leve">Leve — arquivo menor</option>
+          </select>
+        </label>
+
+        <label class="campo">
+          <span>Como separar</span>
+          <select id="separar">
+            <option value="especialidade" selected>Um PDF por especialidade</option>
+            <option value="unico">Um PDF único com tudo</option>
+          </select>
+        </label>
+
+        <div class="botoes-saida">
+          <button class="bt bt-ouro bt-g" id="bt-pdf">Gerar PDF</button>
+          <button class="bt bt-linha" id="bt-zip">Gerar PNGs em ZIP</button>
+        </div>
+
+        <div class="progresso" id="progresso" hidden>
+          <div class="barra"><span id="barra-fill"></span></div>
+          <p id="progresso-txt">Preparando…</p>
+          <button class="bt bt-linha bt-p" id="bt-cancelar">Cancelar</button>
+        </div>
+
+        <ul class="placar-lista" id="placar-lista"></ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="wrap">
+    <p>Tudo roda no seu navegador. Nenhum nome ou imagem é enviado para servidor nenhum.</p>
+    <p class="rodape-2">Os dados ficam salvos neste computador. Use o <b>Backup</b> para levar para outra máquina.</p>
+  </div>
+</footer>
+
+<div class="aviso" id="aviso" hidden><span id="aviso-txt"></span></div>
+
+<input type="file" id="restaurar" accept="application/json,.json" hidden>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="js/app.js?v=1"></script>
+</body>
+</html>
