@@ -125,6 +125,9 @@
   /* Proporção medida no modelo: 827 x 306 (2,70 : 1). */
 
   var PROPORCAO = 827 / 306;
+  var logoPadrao = new Image();
+  logoPadrao.onload = function () { if (typeof pintarPrevia === "function") pintarPrevia() };
+  logoPadrao.src = "assets/logo-adventista-branca.png";
 
   function texto (ctx, txt, x, y, tam, peso, cor, alinha, larguraMax) {
     var t = tam;
@@ -216,30 +219,26 @@
     ctx.fillStyle = cor;
     ctx.fillRect(0, 0, W, H);
 
-    // área branca: retângulo de cantos suaves com a borda esquerda
-    // abaulada, como no modelo. Raio pequeno — raio grande vira pílula.
-    var x1 = 0.967 * W, y0 = 0.072 * H, y1 = 0.968 * H, r = 0.042 * H;
+    // área branca como no modelo: borda verde fina em volta, faixa de
+    // cima mais grossa à esquerda (onde fica a logo) e a curva que desce
+    // do canto da logo até o pé esquerdo.
+    var b = 0.035 * H;
     ctx.beginPath();
-    ctx.moveTo(0.178 * W, y0);
-    ctx.lineTo(x1 - r, y0);
-    ctx.quadraticCurveTo(x1, y0, x1, y0 + r);
-    ctx.lineTo(x1, y1 - r);
-    ctx.quadraticCurveTo(x1, y1, x1 - r, y1);
-    ctx.lineTo(0.205 * W, y1);
-    ctx.bezierCurveTo(0.112 * W, 0.905 * H, 0.062 * W, 0.735 * H, 0.062 * W, 0.520 * H);
-    ctx.bezierCurveTo(0.062 * W, 0.300 * H, 0.108 * W, 0.140 * H, 0.178 * W, y0);
+    ctx.moveTo(0.215 * W, 0.15 * H);
+    ctx.bezierCurveTo(0.45 * W, 0.11 * H, 0.75 * W, b, W - b, b);
+    ctx.lineTo(W - b, H - b);
+    ctx.lineTo(0.05 * W, H - b);
+    ctx.bezierCurveTo(0.085 * W, 0.62 * H, 0.12 * W, 0.26 * H, 0.215 * W, 0.15 * H);
     ctx.closePath();
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = "#FFFFFF";
     ctx.fill();
 
-    // logotipo, no canto verde de cima
-    if (d.logo) {
-      var lh = 0.26 * H, lw = lh * (d.logo.naturalWidth / d.logo.naturalHeight);
-      var lmax = 0.085 * W;
-      if (lw > lmax) { lw = lmax; lh = lw * (d.logo.naturalHeight / d.logo.naturalWidth) }
-      ctx.drawImage(d.logo, 0.068 * W - lw / 2, 0.075 * H, lw, lh);
-    } else {
-      simbolo(ctx, 0.068 * W, 0.205 * H, 0.155 * H, cor);
+    // logo no canto verde, sempre na proporção original
+    var lg = d.logo || logoPadrao;
+    if (lg && lg.naturalWidth) {
+      var lh = 0.40 * H, lw = lh * (lg.naturalWidth / lg.naturalHeight);
+      if (lw > 0.115 * W) { lw = 0.115 * W; lh = lw * (lg.naturalHeight / lg.naturalWidth) }
+      ctx.drawImage(lg, 0.075 * W - lw / 2, 0.055 * H, lw, lh);
     }
 
     var tinta = '#1B1B1B';
