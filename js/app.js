@@ -205,6 +205,38 @@
     ctx.restore();
   }
 
+  /* Nome comprido: primeiro tenta caber encolhendo até 80% da fonte.
+     Se não der, abrevia os nomes do meio, um a um, do penúltimo para
+     trás, mantendo o primeiro e o último nome inteiros. Partículas
+     (de, da, dos...) somem antes de abreviar. Só então a função texto()
+     encolhe o resto. Assim o nome nunca invade o oval. */
+  var PARTICULAS = { de: 1, da: 1, do: 1, das: 1, dos: 1, e: 1 };
+  function nomeQueCabe (ctx, nome, largura, tam) {
+    var limiteFonte = function (t) {
+      ctx.font = '400 ' + Math.round(tam * 0.72) + 'px "Open Sans", Calibri, Arial, sans-serif';
+      return ctx.measureText(t).width <= largura;
+    };
+    nome = nome.replace(/\s+/g, ' ').trim();
+    if (limiteFonte(nome)) return nome;
+
+    var p = nome.split(' ');
+    if (p.length < 3) return nome;
+
+    // tira as partículas do meio
+    var meio = p.slice(1, -1).filter(function (x) { return !PARTICULAS[x.toLowerCase()] });
+    var montar = function () { return [p[0]].concat(meio, p[p.length - 1]).join(' ') };
+    var atual = montar();
+    if (limiteFonte(atual)) return atual;
+
+    // abrevia do penúltimo para trás: "Santos" vira "S."
+    for (var i = meio.length - 1; i >= 0; i--) {
+      meio[i] = meio[i].charAt(0).toUpperCase() + '.';
+      atual = montar();
+      if (limiteFonte(atual)) return atual;
+    }
+    return atual;
+  }
+
   /* encaixa a imagem no oval sem deformar */
   function dentroDoOval (ctx, im, cx, cy, rx, ry) {
     ctx.save();
@@ -258,7 +290,7 @@
 
     // nome da especialidade
     texto(ctx, d.especialidade || '', 0.500 * W, 0.448 * H,
-      Math.round(0.118 * H), '700', escurecer(cor), 'center', 0.50 * W);
+      Math.round(0.118 * H), '700', escurecer(cor), 'center', 0.44 * W);
 
     // desbravador
     var rotulo = 'Desbravador: ';
@@ -266,9 +298,11 @@
     ctx.font = '400 ' + tamNome + 'px "Open Sans", Calibri, Arial, sans-serif';
     var larguraRot = ctx.measureText(rotulo).width;
     var xNome = 0.135 * W;
+    var espaco = limite - (xNome + larguraRot);
+    var nome = nomeQueCabe(ctx, d.nome || '', espaco, tamNome);
     texto(ctx, rotulo, xNome, 0.630 * H, tamNome, '400', tinta, 'left');
-    texto(ctx, d.nome || '', xNome + larguraRot, 0.630 * H,
-      tamNome, '400', tinta, 'left', limite - (xNome + larguraRot));
+    texto(ctx, nome, xNome + larguraRot, 0.630 * H,
+      tamNome, '400', tinta, 'left', espaco);
 
     // data
     texto(ctx, d.data || '', 0.148 * W, 0.748 * H,

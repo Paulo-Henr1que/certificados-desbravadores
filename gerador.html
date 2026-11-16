@@ -222,6 +222,7 @@
 <footer class="rodape">
   <div class="wrap">
     <p>Tudo roda no seu navegador. Nenhum nome ou imagem é enviado para servidor nenhum.</p>
+    <p class="credito">© <span class="ano-atual">2026</span> Desenvolvido por <a href="https://github.com/Paulo-Henr1que" target="_blank" rel="noopener">Paulo Henrique</a>. Todos os direitos reservados.</p>
     <p class="rodape-2">Os dados ficam salvos neste computador. Use o <b>Backup</b> para levar para outra máquina.</p>
   </div>
 </footer>
@@ -233,5 +234,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="js/app.js?v=4"></script>
+<script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 </body>
 </html>

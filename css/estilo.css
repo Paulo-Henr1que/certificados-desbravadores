@@ -299,3 +299,7 @@ textarea{
 .marca{ text-decoration:none; color:inherit }
 .marca-sim{ width:38px; height:auto }
 .previa-barra select{ min-width:0; max-width:100% }
+
+.credito{ margin-bottom:6px; color:var(--tinta-2) }
+.credito a{ color:var(--azul); font-weight:600; text-decoration:none }
+.credito a:hover{ text-decoration:underline }
