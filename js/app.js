@@ -125,6 +125,12 @@
   /* Proporção medida no modelo: 827 x 306 (2,70 : 1). */
 
   var PROPORCAO = 827 / 306;
+  /* tom mais escuro da cor da moldura, para o nome da especialidade ler bem sobre o branco */
+  function escurecer (hex) {
+    var n = parseInt(hex.slice(1), 16), f = 0.72;
+    var r = Math.round(((n >> 16) & 255) * f), g = Math.round(((n >> 8) & 255) * f), b = Math.round((n & 255) * f);
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
   var logoPadrao = new Image();
   logoPadrao.onload = function () { if (typeof pintarPrevia === "function") pintarPrevia() };
   logoPadrao.src = "assets/logo-adventista-branca.png";
@@ -252,7 +258,7 @@
 
     // nome da especialidade
     texto(ctx, d.especialidade || '', 0.500 * W, 0.448 * H,
-      Math.round(0.118 * H), '700', tinta, 'center', 0.50 * W);
+      Math.round(0.118 * H), '700', escurecer(cor), 'center', 0.50 * W);
 
     // desbravador
     var rotulo = 'Desbravador: ';
@@ -265,8 +271,8 @@
       tamNome, '400', tinta, 'left', limite - (xNome + larguraRot));
 
     // data
-    texto(ctx, d.data || '', 0.148 * W, 0.772 * H,
-      Math.round(0.086 * H), '400', tinta, 'left', 0.34 * W);
+    texto(ctx, d.data || '', 0.148 * W, 0.748 * H,
+      Math.round(0.070 * H), '400', tinta, 'left', 0.34 * W);
 
     // linha de assinatura
     ctx.strokeStyle = '#2B2B2B';
@@ -386,15 +392,12 @@
       ul.appendChild(li);
     });
 
-    var sel = id('lote-esp');
-    var antes = sel.value;
-    sel.innerHTML = '';
+    var dl = id('nomes-esp');
+    dl.innerHTML = '';
     estado.especialidades.forEach(function (e) {
       var o = document.createElement('option');
-      o.value = e.id; o.textContent = e.nome;
-      sel.appendChild(o);
+      o.value = e.nome; dl.appendChild(o);
     });
-    if (antes) sel.value = antes;
   }
 
   function editarEsp (i) {
@@ -403,7 +406,8 @@
     editandoEsp = i;
     id('esp-nome').value = e.nome;
     id('esp-cor').value = e.cor;
-    id('esp-cor-hex').value = e.cor.toUpperCase();
+    marcarCor(e.cor);
+    mostrarSoltar(null, e.imgId);
     id('bt-salvar-esp').textContent = 'Salvar alteração';
     id('bt-cancelar-esp').hidden = false;
     id('p-especialidades').scrollIntoView({ block: 'start' });
@@ -412,8 +416,8 @@
   function limparFormEsp () {
     editandoEsp = null; imgPendente = null;
     id('form-esp').reset();
-    id('esp-cor').value = '#08A008';
-    id('esp-cor-hex').value = '#08A008';
+    marcarCor('#08A008');
+    mostrarSoltar(null, null);
     id('bt-salvar-esp').textContent = 'Adicionar especialidade';
     id('bt-cancelar-esp').hidden = true;
   }
@@ -461,22 +465,45 @@
 
   id('bt-cancelar-esp').addEventListener('click', limparFormEsp);
 
-  id('esp-cor').addEventListener('input', function () {
-    id('esp-cor-hex').value = this.value.toUpperCase();
+  function marcarCor (cor) {
+    id('esp-cor').value = cor;
+    var achou = false;
+    $$('#cores .cor[data-cor]').forEach(function (b) {
+      var on = b.dataset.cor.toLowerCase() === cor.toLowerCase();
+      if (on) achou = true;
+      b.classList.toggle('on', on);
+    });
+    var livre = $('.cor-livre');
+    livre.classList.toggle('on', !achou);
+    livre.style.setProperty('--c', achou ? 'transparent' : cor);
+  }
+  $$('#cores .cor[data-cor]').forEach(function (b) {
+    b.addEventListener('click', function () { marcarCor(b.dataset.cor) });
   });
-  id('esp-cor-hex').addEventListener('input', function () {
-    var v = this.value.trim();
-    if (/^#[0-9a-fA-F]{6}$/.test(v)) id('esp-cor').value = v;
-  });
+  id('esp-cor').addEventListener('input', function () { marcarCor(this.value) });
 
-  id('esp-img').addEventListener('change', function () {
-    var f = this.files && this.files[0];
-    if (!f) { imgPendente = null; return }
+  function mostrarSoltar (url, imgId) {
+    var pv = id('soltar-prev'), cx = id('soltar-esp');
+    function poe (u) { pv.src = u; pv.hidden = false; cx.classList.add('cheio') }
+    pv.hidden = true; cx.classList.remove('cheio');
+    if (url) poe(url);
+    else if (imgId) imagemDe(imgId).then(function (im) { if (im) poe(im.src) });
+  }
+  function receberBotao (f) {
+    if (!f) return;
     prepararImagem(f, 520).then(function (url) {
-      imgPendente = url;
-      aviso('Botão carregado. Agora salve a especialidade.');
+      imgPendente = url; mostrarSoltar(url);
     }).catch(function () { aviso('Não consegui ler essa imagem.', true) });
+  }
+  id('esp-img').addEventListener('change', function () { receberBotao(this.files && this.files[0]) });
+  var zona = id('soltar-esp');
+  ['dragenter', 'dragover'].forEach(function (t) {
+    zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.add('sobre') });
   });
+  ['dragleave', 'drop'].forEach(function (t) {
+    zona.addEventListener(t, function (e) { e.preventDefault(); zona.classList.remove('sobre') });
+  });
+  zona.addEventListener('drop', function (e) { receberBotao(e.dataTransfer.files[0]) });
 
   /* logotipo global */
   id('logo-img').addEventListener('change', function () {
@@ -489,6 +516,12 @@
       salvar(); pintarPrevia();
       aviso('Logotipo salvo. Vale para todos os certificados.');
     }).catch(function () { aviso('Não consegui ler esse logotipo.', true) });
+  });
+
+  id('bt-logo-padrao').addEventListener('click', function () {
+    apagarImg('logo'); delete cacheImg.logo;
+    estado.temLogo = false; salvar(); pintarPrevia();
+    aviso('Voltou para a logo oficial.');
   });
 
   /* ═══════════ interface: lotes ═══════════ */
@@ -526,8 +559,16 @@
 
   id('form-lote').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var espId = id('lote-esp').value;
-    if (!espId) { aviso('Cadastre uma especialidade primeiro.', true); return }
+    var nomeEsp = id('lote-esp').value.trim();
+    if (!nomeEsp) { aviso('Escreva a especialidade.', true); return }
+    var esp = estado.especialidades.filter(function (x) {
+      return x.nome.toLowerCase() === nomeEsp.toLowerCase();
+    })[0];
+    if (!esp) {
+      esp = { id: novoId(), nome: nomeEsp, cor: '#08A008', imgId: null };
+      estado.especialidades.push(esp);
+    }
+    var espId = esp.id;
     var nomes = nomesDoTexto(id('lote-nomes').value);
     if (!nomes.length) { aviso('Coloque ao menos um nome.', true); return }
 
@@ -540,6 +581,7 @@
     });
     salvar();
     id('lote-nomes').value = '';
+    id('lote-esp').value = '';
     id('conta-nomes').textContent = '0 nomes';
     pintarTudo();
     aviso(nomes.length + ' certificado' + (nomes.length > 1 ? 's adicionados' : ' adicionado') + ' ao lote.');
@@ -686,6 +728,7 @@
     });
     if (antes) sel.value = antes;
     if (!sel.value && estado.lotes.length) sel.value = estado.lotes[0].id;
+    $('.previa-barra').hidden = !estado.lotes.length;
   }
 
   function loteDaPrevia () {

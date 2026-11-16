@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 912" role="img" aria-label="Clube de Desbravadores">
+  <!-- triângulo vermelho com filete dourado -->
+  <path d="M10 0H890V152L450 912 10 152Z" fill="#E30613"/>
+  <path d="M36 22H864V146L450 866 36 146Z" fill="none" stroke="#FFCC00" stroke-width="20"/>
+  <!-- faixa do nome -->
+  <rect x="60" y="44" width="780" height="88" fill="#FFCC00"/>
+  <rect x="74" y="56" width="752" height="64" fill="#E30613"/>
+  <text x="450" y="112" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="76" fill="#FFCC00" textLength="726" lengthAdjust="spacingAndGlyphs">DESBRAVADORES</text>
+  <!-- escudo -->
+  <path d="M186 190Q450 230 712 190L670 400Q600 500 450 560 300 500 230 400Z" fill="#FFCC00"/>
+  <path d="M214 214Q450 250 684 214L648 392Q584 478 450 532 316 478 252 392Z" fill="#E30613"/>
+  <path d="M240 240Q450 272 658 240L626 384Q570 458 450 506 330 458 274 384Z" fill="#FFFFFF"/>
+  <!-- espada: desenhada deitada e girada no ângulo da original -->
+  <g transform="translate(262 424) rotate(-21.4)" fill="#004B87">
+    <rect x="-14" y="-17" width="78" height="34" rx="4"/>
+    <path d="M60 -98 86 -98 92 96 66 96Z"/>
+    <path d="M84 -16 L486 0 84 16Z"/>
+  </g>
+  <!-- clube -->
+  <text x="450" y="640" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="58" fill="#FFCC00">CLUBE</text>
+</svg>

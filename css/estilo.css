@@ -2,9 +2,9 @@
    Azul, dourado e vermelho do emblema. Outfit + Open Sans. */
 
 :root{
-  --azul:#153C70; --azul-2:#0E2B50; --azul-3:#1E4E8C;
-  --dourado:#E0A82E; --dourado-2:#C08F1F;
-  --vermelho:#C8372D;
+  --azul:#004B87; --azul-2:#003563; --azul-3:#0A5FA6;
+  --dourado:#FFCC00; --dourado-2:#E6B800;
+  --vermelho:#E30613;
   --papel:#F6F7FA; --branco:#FFFFFF;
   --tinta:#16202E; --tinta-2:#5A6475; --tinta-3:#8B94A3;
   --linha:#E2E6ED;
@@ -226,3 +226,76 @@ textarea{
   .placar{ display:none }
   .lista-esp{ grid-template-columns:1fr }
 }
+
+/* ═══════════ refinamento visual ═══════════ */
+.wrap{ max-width:1080px }
+.topo{ box-shadow:0 3px 0 var(--dourado) }
+.topo::after{ content:''; display:block; height:3px; background:linear-gradient(90deg,var(--vermelho) 0 33%,#fff 33% 66%,var(--dourado) 66%) }
+.principal{ gap:26px }
+.bloco{ border:1px solid var(--linha); box-shadow:0 10px 30px -22px rgba(21,60,112,.35) }
+.bloco-topo{ text-align:center; margin-bottom:24px }
+.bloco-topo h2{ justify-content:center }
+.bloco-topo p{ margin-inline:auto }
+
+/* formulário de especialidade */
+.form-esp{ grid-template-columns:1fr 230px; align-items:stretch; gap:20px }
+.esp-col{ display:grid; gap:18px; align-content:start }
+.form-esp .form-pe{ justify-content:center }
+
+.cores{ display:flex; flex-wrap:wrap; gap:10px }
+.cor{
+  width:38px; height:38px; border-radius:50%; border:0; cursor:pointer; padding:0;
+  background:var(--c); position:relative;
+  box-shadow:0 0 0 2px #fff, 0 0 0 3px var(--linha);
+  transition:transform .15s var(--ease), box-shadow .15s;
+}
+.cor:hover{ transform:scale(1.08) }
+.cor.on{ box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--azul) }
+.cor-livre{
+  display:grid; place-items:center; overflow:hidden;
+  background:conic-gradient(#C8372D,#E0A82E,#08A008,#1F8FB0,#153C70,#6A3FA0,#C8372D);
+}
+.cor-livre.on{ background:var(--c) }
+.cor-livre span{ color:#fff; font-weight:700; font-size:18px; text-shadow:0 1px 3px rgba(0,0,0,.45); pointer-events:none }
+.cor-livre input{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100% }
+
+.soltar{
+  display:grid; place-items:center; text-align:center; gap:8px; cursor:pointer;
+  border:2px dashed #C6D1E2; border-radius:16px; background:#F7F9FC;
+  padding:18px; min-height:190px; transition:border-color .18s, background .18s;
+}
+.soltar:hover, .soltar.sobre{ border-color:var(--azul-3); background:#EEF3FB }
+.soltar.cheio{ border-style:solid; border-color:var(--verde-ok); background:#F3FAF5 }
+.soltar img{ width:110px; height:110px; object-fit:contain; border-radius:50% }
+.soltar-txt{ font-size:13.5px; color:var(--tinta-2); line-height:1.45 }
+.soltar-txt b{ display:block; font-family:'Outfit',sans-serif; font-size:15px; color:var(--tinta); margin-bottom:4px }
+.soltar.cheio .soltar-txt b::after{ content:' ✓'; color:var(--verde-ok) }
+
+.logo-troca{ margin-top:22px; text-align:center; font-size:13.5px; color:var(--tinta-3) }
+.logo-troca summary{ cursor:pointer; list-style:none }
+.logo-troca summary::-webkit-details-marker{ display:none }
+.logo-troca summary:hover{ color:var(--azul-3) }
+.logo-troca[open] summary{ margin-bottom:12px }
+.logo-troca .bt{ margin:4px }
+
+/* lote */
+.form-lote{ align-items:start }
+.ajuda{ font-size:12.5px; color:var(--tinta-3); line-height:1.4 }
+.abas{ margin-inline:auto }
+#painel-massa .dica{ margin-inline:auto; text-align:center }
+
+/* prévia */
+.previa-barra{ flex-wrap:wrap }
+.previa-rot{ font-size:13.5px; font-weight:600; color:var(--tinta); white-space:nowrap }
+
+@media (max-width:720px){
+  .form-esp{ grid-template-columns:1fr }
+  .soltar{ min-height:150px }
+  .bloco-topo h2{ font-size:19px }
+}
+
+/* itens de grade não podem crescer além da tela por causa do conteúdo */
+.principal > *, .gerar-grade > *, .form-lote > *, .form-esp > * { min-width:0 }
+.marca{ text-decoration:none; color:inherit }
+.marca-sim{ width:38px; height:auto }
+.previa-barra select{ min-width:0; max-width:100% }

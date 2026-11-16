@@ -2,226 +2,174 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gerador de Certificados · Desbravadores</title>
-<meta name="description" content="Gerador de certificados de especialidade para clubes de Desbravadores. Lotes em massa, PDF e PNG.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Certificados de Especialidade · Desbravadores</title>
+<meta name="description" content="Gere em poucos minutos os certificados de especialidade do seu Clube de Desbravadores: um por um ou centenas de uma vez.">
+<link rel="icon" href="assets/desbravadores.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/estilo.css?v=2">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Outfit:wght@500;600;700&display=swap">
+<style>
+  :root{ --azul:#004B87; --azul-2:#003563; --vermelho:#E30613; --ouro:#FFCC00; --tinta:#14202E; --tinta-2:#55606F; --papel:#F6F7FA }
+  *,*::before,*::after{ box-sizing:border-box }
+  html{ overflow-x:clip }
+  body{ margin:0; font-family:'Open Sans',system-ui,sans-serif; color:var(--tinta-2); background:#fff; line-height:1.6; -webkit-font-smoothing:antialiased }
+  h1,h2,h3{ font-family:'Outfit',system-ui,sans-serif; color:var(--tinta); margin:0; line-height:1.12 }
+  p{ margin:0 }
+  a{ color:inherit }
+  .wrap{ max-width:1060px; margin:0 auto; padding-inline:22px }
+
+  /* faixa com as quatro cores do clube */
+  .faixa{ height:6px; background:linear-gradient(90deg,var(--azul) 0 25%,var(--vermelho) 25% 50%,var(--ouro) 50% 75%,#fff 75%); box-shadow:inset 0 -1px 0 #E3E7EE }
+
+  /* capa */
+  .capa{ background:var(--azul); color:#D6E2F0; position:relative; overflow:hidden }
+  .capa::after{ content:''; position:absolute; right:-140px; bottom:-200px; width:520px; height:520px; border-radius:50%; background:rgba(255,204,0,.08) }
+  .capa-in{ display:grid; grid-template-columns:1.15fr .85fr; gap:40px; align-items:center; padding-block:72px 84px; position:relative; z-index:1 }
+  .selo{ display:inline-flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--ouro); margin-bottom:18px }
+  .selo::before{ content:''; width:22px; height:3px; background:var(--ouro); border-radius:2px }
+  .capa h1{ color:#fff; font-size:clamp(34px,5.2vw,58px); font-weight:700; letter-spacing:-.01em }
+  .capa h1 span{ color:var(--ouro) }
+  .capa p.sub{ margin-top:18px; font-size:18px; max-width:44ch; color:#C6D5E8 }
+  .acoes{ display:flex; flex-wrap:wrap; gap:12px; margin-top:32px }
+  .bt{ display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:14px 28px; border-radius:999px; font-family:'Outfit',sans-serif; font-weight:600; font-size:16px; text-decoration:none; transition:transform .15s, background .2s, box-shadow .2s }
+  .bt:active{ transform:scale(.97) }
+  .bt-ouro{ background:var(--ouro); color:#2A2100 }
+  .bt-ouro:hover{ background:#FFD633; box-shadow:0 10px 26px -10px rgba(255,204,0,.8) }
+  .bt-vazio{ color:#fff; box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4) }
+  .bt-vazio:hover{ box-shadow:inset 0 0 0 1.5px #fff }
+  .bt svg{ width:18px; height:18px }
+  .emblema{ justify-self:center; width:min(300px,70vw); height:auto; filter:drop-shadow(0 22px 34px rgba(0,0,0,.35)); animation:flutua 6s ease-in-out infinite }
+  @keyframes flutua{ 50%{ transform:translateY(-10px) } }
+
+  /* passos */
+  .sec{ padding-block:80px }
+  .sec-topo{ text-align:center; max-width:620px; margin:0 auto 46px }
+  .sec-topo h2{ font-size:clamp(26px,3.4vw,38px) }
+  .sec-topo p{ margin-top:12px; font-size:16.5px }
+  .passos{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:20px }
+  .passos li{ background:var(--papel); border-radius:20px; padding:30px 26px; transition:transform .2s, box-shadow .2s }
+  .passos li:hover{ transform:translateY(-4px); box-shadow:0 18px 36px -24px rgba(0,75,135,.5) }
+  .n{ display:grid; place-items:center; width:46px; height:46px; border-radius:50%; font-family:'Outfit',sans-serif; font-weight:700; font-size:19px; margin-bottom:18px }
+  .passos li:nth-child(1) .n{ background:var(--azul); color:#fff }
+  .passos li:nth-child(2) .n{ background:var(--vermelho); color:#fff }
+  .passos li:nth-child(3) .n{ background:var(--ouro); color:#2A2100 }
+  .passos h3{ font-size:20px; margin-bottom:8px }
+  .passos p{ font-size:15px }
+
+  /* cores com significado */
+  .cores-sec{ background:var(--papel) }
+  .cores{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
+  .cor{ background:#fff; border-radius:18px; padding:22px 20px; border:1px solid #E3E7EE }
+  .amostra{ width:40px; height:40px; border-radius:50%; margin-bottom:14px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.1) }
+  .cor h3{ font-size:17px; margin-bottom:6px }
+  .cor p{ font-size:14px; line-height:1.5 }
+
+  /* chamada final */
+  .final{ text-align:center }
+  .final .caixa{ background:var(--azul); border-radius:26px; padding:56px 26px; color:#C6D5E8 }
+  .final h2{ color:#fff; font-size:clamp(26px,3.6vw,38px) }
+  .final p{ margin:12px auto 28px; max-width:46ch }
+  .verso{ margin-top:22px; font-size:14px; font-style:italic; color:#9DB4D0 }
+
+  .rodape{ padding-block:30px 40px; text-align:center; font-size:13.5px; color:#8B94A3 }
+
+  @media (max-width:900px){
+    .capa-in{ grid-template-columns:1fr; text-align:center; padding-block:48px 60px }
+    .emblema{ order:-1; width:min(200px,52vw) }
+    .selo{ justify-content:center }
+    .capa p.sub{ margin-inline:auto }
+    .acoes{ justify-content:center }
+    .passos{ grid-template-columns:1fr }
+    .cores{ grid-template-columns:1fr 1fr }
+    .sec{ padding-block:60px }
+  }
+  @media (max-width:480px){
+    .wrap{ padding-inline:16px }
+    .acoes .bt{ width:100% }
+    .cores{ grid-template-columns:1fr }
+    .capa p.sub{ font-size:16.5px }
+  }
+  @media (prefers-reduced-motion:reduce){ .emblema{ animation:none } }
+</style>
 </head>
 <body>
 
-<header class="topo">
-  <div class="wrap topo-in">
-    <div class="marca">
-      <svg viewBox="0 0 40 40" aria-hidden="true" class="marca-sim">
-        <path d="M20 3 6 11v12c0 8 6 13 14 14 8-1 14-6 14-14V11z" fill="var(--dourado)"/>
-        <path d="M20 8 11 13v9.4c0 5.6 4 9.2 9 10.2 5-1 9-4.6 9-10.2V13z" fill="var(--azul)"/>
-        <path d="M20 13.5 16 23h8z" fill="var(--vermelho)"/>
-        <path d="M13 24.5h14v2.2H13z" fill="#fff"/>
-      </svg>
-      <span>
-        <b>Certificados</b>
-        <small>Clube de Desbravadores</small>
-      </span>
+<div class="faixa"></div>
+
+<header class="capa">
+  <div class="wrap capa-in">
+    <div>
+      <p class="selo">Clube de Desbravadores</p>
+      <h1>Certificados de especialidade <span>em minutos</span></h1>
+      <p class="sub">Gere os certificados do seu clube um por um ou centenas de uma vez, no modelo oficial, prontos para imprimir.</p>
+      <div class="acoes">
+        <a class="bt bt-ouro" href="gerador.html">
+          Começar a gerar
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3z"/></svg>
+        </a>
+        <a class="bt bt-vazio" href="#como">Como funciona</a>
+      </div>
     </div>
-    <nav class="topo-nav">
-      <span class="placar" id="placar">0 certificados</span>
-      <button class="bt bt-linha" id="bt-backup">Backup</button>
-      <button class="bt bt-ouro" id="bt-gerar-topo">Gerar</button>
-    </nav>
+    <img class="emblema" src="assets/desbravadores.svg" alt="Emblema do Clube de Desbravadores" width="300" height="304">
   </div>
 </header>
 
-<main class="wrap principal">
-
-  <!-- ═══════════ 1 · especialidades ═══════════ -->
-  <section class="bloco" id="p-especialidades">
-    <div class="bloco-topo">
-      <h2><span class="passo">1</span>Especialidades</h2>
-      <p>Cadastre uma vez e reaproveite em quantos lotes quiser. A cor e o botão ficam salvos junto.</p>
-    </div>
-
-    <form class="form-esp" id="form-esp">
-      <label class="campo">
-        <span>Nome da especialidade</span>
-        <input type="text" id="esp-nome" placeholder="Ecologia" required maxlength="60">
-      </label>
-
-      <label class="campo campo-cor">
-        <span>Cor da moldura</span>
-        <span class="cor-caixa">
-          <input type="color" id="esp-cor" value="#08A008">
-          <input type="text" id="esp-cor-hex" value="#08A008" maxlength="7" spellcheck="false" aria-label="Cor em hexadecimal">
-        </span>
-      </label>
-
-      <label class="campo">
-        <span>Botão da especialidade <small>PNG ou JPG</small></span>
-        <input type="file" id="esp-img" accept="image/png,image/jpeg">
-      </label>
-
-      <label class="campo campo-largo">
-        <span>Logotipo da igreja <small>opcional. Já vem a logo oficial; envie outra só se quiser trocar.</small></span>
-        <input type="file" id="logo-img" accept="image/png,image/jpeg,image/svg+xml">
-      </label>
-
-      <div class="form-pe">
-        <button type="submit" class="bt bt-azul" id="bt-salvar-esp">Adicionar especialidade</button>
-        <button type="button" class="bt bt-linha" id="bt-cancelar-esp" hidden>Cancelar edição</button>
+<main>
+  <section class="sec" id="como">
+    <div class="wrap">
+      <div class="sec-topo">
+        <h2>Três passos, do cadastro à impressão</h2>
+        <p>Pensado para quem precisa entregar muitos certificados de uma vez, sem montar um por um.</p>
       </div>
-    </form>
-
-    <ul class="lista-esp" id="lista-esp"></ul>
-    <p class="vazio" id="esp-vazio">Nenhuma especialidade cadastrada ainda.</p>
+      <ol class="passos">
+        <li>
+          <span class="n">1</span>
+          <h3>Cadastre as especialidades</h3>
+          <p>Nome, cor da moldura e a imagem do botão. Uma vez só, e vale para todos os certificados daquela especialidade.</p>
+        </li>
+        <li>
+          <span class="n">2</span>
+          <h3>Cole a lista de nomes</h3>
+          <p>Um por linha, ou a planilha inteira com especialidade e nome. Repetidos são ignorados sozinhos.</p>
+        </li>
+        <li>
+          <span class="n">3</span>
+          <h3>Baixe e imprima</h3>
+          <p>PDF com 1, 2 ou 3 certificados por folha, um arquivo por especialidade. Ou as imagens soltas em PNG.</p>
+        </li>
+      </ol>
+    </div>
   </section>
 
-  <!-- ═══════════ 2 · lotes ═══════════ -->
-  <section class="bloco" id="p-lotes">
-    <div class="bloco-topo">
-      <h2><span class="passo">2</span>Lotes</h2>
-      <p>Um lote é uma especialidade com a sua lista de desbravadores. Monte quantos precisar.</p>
-    </div>
-
-    <div class="abas" role="tablist">
-      <button class="aba on" data-aba="manual" role="tab" aria-selected="true">Montar um lote</button>
-      <button class="aba" data-aba="massa" role="tab" aria-selected="false">Importar lista em massa</button>
-    </div>
-
-    <!-- lote manual -->
-    <div class="painel" id="painel-manual">
-      <form class="form-lote" id="form-lote">
-        <label class="campo">
-          <span>Especialidade</span>
-          <select id="lote-esp" required></select>
-        </label>
-
-        <fieldset class="campo campo-data">
-          <legend>Data</legend>
-          <label class="radio"><input type="radio" name="tipo-data" value="branco" checked> Deixar em branco para preencher à mão</label>
-          <label class="radio"><input type="radio" name="tipo-data" value="ano"> Só o ano</label>
-          <label class="radio"><input type="radio" name="tipo-data" value="cheia"> Data completa</label>
-          <div class="data-campos">
-            <input type="text" id="data-dia" placeholder="dd" maxlength="2" inputmode="numeric" disabled>
-            <input type="text" id="data-mes" placeholder="mm" maxlength="2" inputmode="numeric" disabled>
-            <input type="text" id="data-ano" placeholder="aaaa" maxlength="4" inputmode="numeric" value="2026">
-          </div>
-        </fieldset>
-
-        <label class="campo campo-largo">
-          <span>Desbravadores <small>um nome por linha</small></span>
-          <textarea id="lote-nomes" rows="7" placeholder="Miguel Félix&#10;Ana Clara Souza&#10;Pedro Henrique Lima"></textarea>
-        </label>
-
-        <div class="form-pe">
-          <span class="conta" id="conta-nomes">0 nomes</span>
-          <button type="submit" class="bt bt-azul">Adicionar lote</button>
-        </div>
-      </form>
-    </div>
-
-    <!-- importação em massa -->
-    <div class="painel" id="painel-massa" hidden>
-      <p class="dica">
-        Cole uma linha por desbravador, no formato <code>Especialidade ; Nome</code>.
-        Aceita <code>;</code>, <code>,</code> ou tabulação (dá para colar direto do Excel).
-        As especialidades que ainda não existirem são criadas na hora, e você escolhe a cor e o botão depois.
-      </p>
-      <textarea id="massa-txt" rows="10" placeholder="Ecologia; Miguel Félix&#10;Ecologia; Ana Clara Souza&#10;Répteis; Pedro Henrique Lima&#10;Nós e Amarras; João Vitor"></textarea>
-      <div class="form-pe">
-        <label class="bt bt-linha arquivo">
-          Carregar arquivo CSV
-          <input type="file" id="massa-csv" accept=".csv,.txt,text/csv,text/plain" hidden>
-        </label>
-        <span class="conta" id="conta-massa">0 linhas</span>
-        <button type="button" class="bt bt-azul" id="bt-massa">Criar lotes</button>
+  <section class="sec cores-sec">
+    <div class="wrap">
+      <div class="sec-topo">
+        <h2>As cores do nosso emblema</h2>
+        <p>Cada cor do triângulo dos Desbravadores carrega um compromisso.</p>
       </div>
-      <div class="resumo" id="resumo-massa" hidden></div>
-    </div>
-
-    <ul class="lista-lotes" id="lista-lotes"></ul>
-    <p class="vazio" id="lotes-vazio">Nenhum lote montado ainda.</p>
-  </section>
-
-  <!-- ═══════════ 3 · conferir e gerar ═══════════ -->
-  <section class="bloco" id="p-gerar">
-    <div class="bloco-topo">
-      <h2><span class="passo">3</span>Conferir e gerar</h2>
-      <p>A prévia mostra o primeiro certificado do lote selecionado.</p>
-    </div>
-
-    <div class="gerar-grade">
-      <div class="previa-area">
-        <div class="previa-barra">
-          <select id="previa-lote" aria-label="Lote da prévia"></select>
-          <button class="bt bt-linha bt-p" id="bt-png-um">Baixar este PNG</button>
-        </div>
-        <div class="previa-moldura">
-          <canvas id="previa" width="2480" height="918" aria-label="Prévia do certificado"></canvas>
-        </div>
-      </div>
-
-      <div class="saida">
-        <h3>Saída</h3>
-
-        <label class="campo">
-          <span>Certificados por página</span>
-          <select id="por-pagina">
-            <option value="2" selected>2 por página (A4 deitada)</option>
-            <option value="1">1 por página (A4 deitada)</option>
-            <option value="3">3 por página (A4 em pé)</option>
-          </select>
-        </label>
-
-        <label class="campo">
-          <span>Qualidade</span>
-          <select id="qualidade">
-            <option value="alta">Alta — para imprimir</option>
-            <option value="boa" selected>Boa — equilíbrio</option>
-            <option value="leve">Leve — arquivo menor</option>
-          </select>
-        </label>
-
-        <label class="campo">
-          <span>Como separar</span>
-          <select id="separar">
-            <option value="especialidade" selected>Um PDF por especialidade</option>
-            <option value="unico">Um PDF único com tudo</option>
-          </select>
-        </label>
-
-        <div class="botoes-saida">
-          <button class="bt bt-ouro bt-g" id="bt-pdf">Gerar PDF</button>
-          <button class="bt bt-linha" id="bt-zip">Gerar PNGs em ZIP</button>
-        </div>
-
-        <div class="progresso" id="progresso" hidden>
-          <div class="barra"><span id="barra-fill"></span></div>
-          <p id="progresso-txt">Preparando…</p>
-          <button class="bt bt-linha bt-p" id="bt-cancelar">Cancelar</button>
-        </div>
-
-        <ul class="placar-lista" id="placar-lista"></ul>
+      <div class="cores">
+        <div class="cor"><span class="amostra" style="background:#FFCC00"></span><h3>Ouro</h3><p>A excelência dos ideais e a busca pelo melhor em tudo o que fazemos.</p></div>
+        <div class="cor"><span class="amostra" style="background:#E30613"></span><h3>Vermelho</h3><p>O sacrifício de Jesus Cristo e a coragem para servir.</p></div>
+        <div class="cor"><span class="amostra" style="background:#004B87"></span><h3>Azul</h3><p>Lealdade a Deus, à família, à igreja e aos princípios do clube.</p></div>
+        <div class="cor"><span class="amostra" style="background:#FFFFFF"></span><h3>Branco</h3><p>Pureza, verdade e paz no caráter de cada desbravador.</p></div>
       </div>
     </div>
   </section>
 
+  <section class="sec final">
+    <div class="wrap">
+      <div class="caixa">
+        <h2>Pronto para reconhecer o seu clube?</h2>
+        <p>Tudo roda no seu navegador. Nenhum nome é enviado para servidor nenhum.</p>
+        <a class="bt bt-ouro" href="gerador.html">Abrir o gerador</a>
+        <p class="verso">"Tudo quanto te vier à mão para fazer, faze-o conforme as tuas forças." Eclesiastes 9:10</p>
+      </div>
+    </div>
+  </section>
 </main>
 
-<footer class="rodape">
-  <div class="wrap">
-    <p>Tudo roda no seu navegador. Nenhum nome ou imagem é enviado para servidor nenhum.</p>
-    <p class="rodape-2">Os dados ficam salvos neste computador. Use o <b>Backup</b> para levar para outra máquina.</p>
-  </div>
-</footer>
+<footer class="rodape">Feito para os Clubes de Desbravadores da Igreja Adventista do Sétimo Dia.</footer>
 
-<div class="aviso" id="aviso" hidden><span id="aviso-txt"></span></div>
-
-<input type="file" id="restaurar" accept="application/json,.json" hidden>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="js/app.js?v=2"></script>
 </body>
 </html>
