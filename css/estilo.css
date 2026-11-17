@@ -444,3 +444,5 @@ textarea{
 .placar-total{ padding-bottom:6px; border-bottom:1px solid var(--linha); color:var(--tinta) }
 .placar-ver{ border:0; background:none; padding:4px 0; cursor:pointer; color:var(--azul-3); font:600 13px 'Outfit',sans-serif }
 .principal{ padding-block:30px 24px }
+.abas{ display:grid; grid-template-columns:1fr 1fr; width:100%; max-width:420px }
+.aba{ white-space:nowrap; text-align:center; padding-inline:10px }
