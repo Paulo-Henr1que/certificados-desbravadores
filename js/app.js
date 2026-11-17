@@ -1186,6 +1186,7 @@
 
   /* ═══════════ pintura geral ═══════════ */
 
+  var placarAberto = false;
   function pintarPlacar () {
     var total = totalCertificados();
     id('placar').textContent = total + (total === 1 ? ' certificado' : ' certificados');
@@ -1199,15 +1200,29 @@
 
     var ul = id('placar-lista');
     ul.innerHTML = '';
-    Object.keys(porEsp).sort().forEach(function (n) {
+    var nomes = Object.keys(porEsp).sort(function (a, b) { return a.localeCompare(b, 'pt', { numeric: true }) });
+    if (!total) return;
+    var topo = document.createElement('li');
+    topo.className = 'placar-total';
+    topo.innerHTML = '<span><b>Total</b> · ' + nomes.length + (nomes.length === 1 ? ' especialidade' : ' especialidades') + '</span><b>' + total + '</b>';
+    ul.appendChild(topo);
+    var poucos = nomes.length <= 4;
+    nomes.forEach(function (n) {
       var li = document.createElement('li');
+      li.className = 'placar-item';
+      li.hidden = !poucos && !placarAberto;
       li.innerHTML = '<span>' + n.replace(/</g, '&lt;') + '</span><b>' + porEsp[n] + '</b>';
       ul.appendChild(li);
     });
-    if (total) {
-      var li2 = document.createElement('li');
-      li2.innerHTML = '<span><b>Total</b></span><b>' + total + '</b>';
-      ul.appendChild(li2);
+    if (!poucos) {
+      var bt = document.createElement('button');
+      bt.type = 'button';
+      bt.className = 'placar-ver';
+      bt.textContent = placarAberto ? 'Esconder detalhes' : 'Ver por especialidade';
+      bt.addEventListener('click', function () { placarAberto = !placarAberto; pintarPlacar() });
+      var li3 = document.createElement('li');
+      li3.appendChild(bt);
+      ul.appendChild(li3);
     }
   }
 
