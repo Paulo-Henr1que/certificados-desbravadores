@@ -224,7 +224,7 @@
     if (emblema.naturalWidth) encaixar(ctx, emblema, 0.022 * W, 0.69 * H, 0.19 * W, 0.29 * H);
 
     // boton no lugar do QR code: quadro branco
-    quadroBoton(ctx, H, 0.79 * W, 0.745 * H, 0.185 * W, 0.20 * H, d);
+    quadroBoton(ctx, H, 0.765 * W, 0.735 * H, 0.213 * W, 0.23 * H, d);
   };
 
   /* Modelo 2 "Compacto": mesmo estilo do grande, no formato da faixa
@@ -312,7 +312,7 @@
     if (emblema.naturalWidth) encaixar(ctx, emblema, 0.03 * u, 0.56 * u, 0.36 * u, 0.40 * u);
 
     // boton: espelho do emblema, no canto de baixo à direita
-    quadroBoton(ctx, H, W - 0.45 * u, 0.62 * u, 0.42 * u, 0.32 * u, d);
+    quadroBoton(ctx, H, W - 0.51 * u, 0.60 * u, 0.483 * u, 0.368 * u, d);
   };
 
   /* igual ao paragrafo(), mas cada trecho pode ter cor própria */
