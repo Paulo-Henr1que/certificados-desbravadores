@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/estilo.css?v=4">
+<link rel="stylesheet" href="css/estilo.css?v=6">
 </head>
 <body>
 
@@ -51,10 +51,18 @@
             <button type="button" class="cor" data-cor="#E07A1F" style="--c:#E07A1F" aria-label="Laranja"></button>
             <button type="button" class="cor" data-cor="#1F8FB0" style="--c:#1F8FB0" aria-label="Azul-claro"></button>
             <button type="button" class="cor" data-cor="#6B4A2B" style="--c:#6B4A2B" aria-label="Marrom"></button>
-            <label class="cor cor-livre" title="Outra cor">
-              <input type="color" id="esp-cor" value="#08A008" aria-label="Escolher outra cor">
-              <span>+</span>
-            </label>
+            <button type="button" class="cor cor-livre" id="abrir-cor" title="Outra cor" aria-expanded="false" aria-controls="painel-cor"><span>+</span></button>
+            <input type="hidden" id="esp-cor" value="#08A008">
+          </div>
+          <div class="painel-cor" id="painel-cor" hidden>
+            <div class="pc-topo">
+              <span class="pc-amostra" id="pc-amostra"></span>
+              <input type="text" id="pc-hex" value="#08A008" maxlength="7" spellcheck="false" aria-label="Código da cor">
+            </div>
+            <label class="pc-rot">Tom<input type="range" id="pc-tom" min="0" max="359" value="120" class="pc-faixa pc-faixa-tom"></label>
+            <label class="pc-rot">Intensidade<input type="range" id="pc-sat" min="20" max="100" value="90" class="pc-faixa" id-ref="sat"></label>
+            <label class="pc-rot">Claridade<input type="range" id="pc-luz" min="18" max="60" value="33" class="pc-faixa"></label>
+            <button type="button" class="bt bt-azul bt-p" id="pc-ok">Usar esta cor</button>
           </div>
         </div>
       </div>
@@ -101,20 +109,27 @@
       <form class="form-lote" id="form-lote">
         <label class="campo">
           <span>Especialidade</span>
-          <input type="text" id="lote-esp" list="nomes-esp" placeholder="Digite ou escolha. Ex.: Ecologia" autocomplete="off" required>
-          <datalist id="nomes-esp"></datalist>
+          <div class="combo">
+            <input type="text" id="lote-esp" placeholder="Digite ou escolha. Ex.: Ecologia" autocomplete="off" required role="combobox" aria-expanded="false" aria-controls="combo-lista">
+            <ul class="combo-lista" id="combo-lista" role="listbox" hidden></ul>
+          </div>
           <small class="ajuda">Se ainda não existir, ela é cadastrada em verde e você ajusta depois no passo 1.</small>
         </label>
 
         <fieldset class="campo campo-data">
-          <legend>Data</legend>
-          <label class="radio"><input type="radio" name="tipo-data" value="branco" checked> Deixar em branco para preencher à mão</label>
-          <label class="radio"><input type="radio" name="tipo-data" value="ano"> Só o ano</label>
-          <label class="radio"><input type="radio" name="tipo-data" value="cheia"> Data completa</label>
-          <div class="data-campos">
-            <input type="text" id="data-dia" placeholder="dd" maxlength="2" inputmode="numeric" disabled>
-            <input type="text" id="data-mes" placeholder="mm" maxlength="2" inputmode="numeric" disabled>
-            <input type="text" id="data-ano" placeholder="aaaa" maxlength="4" inputmode="numeric" value="2026">
+          <legend>Data no certificado</legend>
+          <div class="segmento" role="radiogroup">
+            <label><input type="radio" name="tipo-data" value="branco" checked><span>Em branco</span></label>
+            <label><input type="radio" name="tipo-data" value="ano"><span>Só o ano</span></label>
+            <label><input type="radio" name="tipo-data" value="cheia"><span>Completa</span></label>
+          </div>
+          <div class="data-linha">
+            <span class="data-dica" id="data-dica">Sai ___ / ___ / ______ para preencher à mão.</span>
+            <div class="data-campos">
+              <input type="text" id="data-dia" placeholder="dia" maxlength="2" inputmode="numeric" disabled aria-label="Dia">
+              <input type="text" id="data-mes" placeholder="mês" maxlength="2" inputmode="numeric" disabled aria-label="Mês">
+              <input type="text" id="data-ano" placeholder="ano" maxlength="4" inputmode="numeric" value="2026" disabled aria-label="Ano">
+            </div>
           </div>
         </fieldset>
 
@@ -163,11 +178,13 @@
     <div class="gerar-grade">
       <div class="previa-area">
         <div class="previa-barra">
-          <label class="previa-rot" for="previa-lote">Ver prévia do lote</label>
-          <select id="previa-lote"></select>
+          <span class="previa-rot">Lote na prévia</span>
+          <select id="previa-lote" hidden></select>
+          <div class="chips-lote" id="chips-lote"></div>
           <button class="bt bt-linha bt-p" id="bt-png-um">Baixar este PNG</button>
         </div>
-        <div class="previa-moldura">
+        <div class="previa-moldura" id="previa-moldura" title="Clique para ampliar" role="button" tabindex="0">
+          <span class="lupa">Clique para ampliar</span>
           <canvas id="previa" width="2480" height="918" aria-label="Prévia do certificado"></canvas>
         </div>
       </div>
@@ -227,13 +244,18 @@
   </div>
 </footer>
 
+<div class="zoom" id="zoom" hidden>
+  <button class="zoom-x" id="zoom-x" aria-label="Fechar">✕</button>
+  <img id="zoom-img" alt="Certificado ampliado">
+</div>
+
 <div class="aviso" id="aviso" hidden><span id="aviso-txt"></span></div>
 
 <input type="file" id="restaurar" accept="application/json,.json" hidden>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="js/app.js?v=4"></script>
+<script src="js/app.js?v=6"></script>
 <script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 </body>
 </html>

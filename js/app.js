@@ -315,7 +315,7 @@
     ctx.moveTo(0.372 * W, 0.868 * H);
     ctx.lineTo(0.700 * W, 0.868 * H);
     ctx.stroke();
-    texto(ctx, '(Diretor)', 0.536 * W, 0.942 * H,
+    texto(ctx, '(Instrutor)', 0.536 * W, 0.942 * H,
       Math.round(0.058 * H), '400', tinta, 'center');
 
     // oval do boton da especialidade
@@ -426,12 +426,7 @@
       ul.appendChild(li);
     });
 
-    var dl = id('nomes-esp');
-    dl.innerHTML = '';
-    estado.especialidades.forEach(function (e) {
-      var o = document.createElement('option');
-      o.value = e.nome; dl.appendChild(o);
-    });
+    pintarCombo();
   }
 
   function editarEsp (i) {
@@ -514,7 +509,43 @@
   $$('#cores .cor[data-cor]').forEach(function (b) {
     b.addEventListener('click', function () { marcarCor(b.dataset.cor) });
   });
-  id('esp-cor').addEventListener('input', function () { marcarCor(this.value) });
+  /* painel de cor próprio: tom, intensidade e claridade, mais o código */
+  function hslHex (h, sat, l) {
+    sat /= 100; l /= 100;
+    var k = function (n) { return (n + h / 30) % 12 };
+    var a = sat * Math.min(l, 1 - l);
+    var c = function (n) {
+      var v = l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      return Math.round(v * 255).toString(16).padStart(2, '0');
+    };
+    return ('#' + c(0) + c(8) + c(4)).toUpperCase();
+  }
+  var painel = id('painel-cor'), corPainel = '#08A008';
+  function atualizarPainel () {
+    corPainel = hslHex(+id('pc-tom').value, +id('pc-sat').value, +id('pc-luz').value);
+    id('pc-amostra').style.background = corPainel;
+    id('pc-hex').value = corPainel;
+    painel.style.setProperty('--tom', id('pc-tom').value);
+  }
+  ['pc-tom', 'pc-sat', 'pc-luz'].forEach(function (k) { id(k).addEventListener('input', atualizarPainel) });
+  id('pc-hex').addEventListener('input', function () {
+    var v = this.value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) { corPainel = v.toUpperCase(); id('pc-amostra').style.background = v }
+  });
+  id('abrir-cor').addEventListener('click', function (e) {
+    e.stopPropagation();
+    var abrir = painel.hidden;
+    painel.hidden = !abrir;
+    this.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+    if (abrir) atualizarPainel();
+  });
+  id('pc-ok').addEventListener('click', function () {
+    marcarCor(corPainel); painel.hidden = true;
+    id('abrir-cor').setAttribute('aria-expanded', 'false');
+  });
+  document.addEventListener('click', function (e) {
+    if (!painel.hidden && !painel.contains(e.target)) painel.hidden = true;
+  });
 
   function mostrarSoltar (url, imgId) {
     var pv = id('soltar-prev'), cx = id('soltar-esp');
@@ -588,6 +619,8 @@
       id('data-dia').disabled = t !== 'cheia';
       id('data-mes').disabled = t !== 'cheia';
       id('data-ano').disabled = t === 'branco';
+      id('data-dica').hidden = t !== 'branco';
+      if (t === 'ano' && !id('data-ano').value) id('data-ano').value = new Date().getFullYear();
     });
   });
 
@@ -746,6 +779,52 @@
     aviso('Lotes criados.');
   });
 
+  /* ═══════════ menu de especialidades ═══════════ */
+
+  var combo = id('lote-esp'), lista = id('combo-lista'), marcado = -1;
+  function pintarCombo () {
+    if (!lista) return;
+    var q = combo.value.trim().toLowerCase();
+    var achadas = estado.especialidades.filter(function (e) { return e.nome.toLowerCase().indexOf(q) > -1 });
+    lista.innerHTML = '';
+    achadas.forEach(function (e, i) {
+      var li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.className = i === marcado ? 'on' : '';
+      li.innerHTML = '<span class="bolinha" style="background:' + e.cor + '"></span>';
+      li.appendChild(document.createTextNode(e.nome));
+      li.addEventListener('mousedown', function (ev) { ev.preventDefault(); escolher(e.nome) });
+      lista.appendChild(li);
+    });
+    var existe = estado.especialidades.some(function (e) { return e.nome.toLowerCase() === q });
+    if (q && !existe) {
+      var nova = document.createElement('li');
+      nova.className = 'nova';
+      nova.textContent = '+ Criar "' + combo.value.trim() + '"';
+      nova.addEventListener('mousedown', function (ev) { ev.preventDefault(); fecharCombo() });
+      lista.appendChild(nova);
+    }
+    if (!lista.children.length) {
+      var v = document.createElement('li');
+      v.className = 'vazia';
+      v.textContent = 'Nenhuma especialidade cadastrada. Digite o nome.';
+      lista.appendChild(v);
+    }
+  }
+  function abrirCombo () { pintarCombo(); lista.hidden = false; combo.setAttribute('aria-expanded', 'true') }
+  function fecharCombo () { lista.hidden = true; marcado = -1; combo.setAttribute('aria-expanded', 'false') }
+  function escolher (nome) { combo.value = nome; fecharCombo() }
+  combo.addEventListener('focus', abrirCombo);
+  combo.addEventListener('input', function () { marcado = -1; abrirCombo() });
+  combo.addEventListener('blur', function () { setTimeout(fecharCombo, 120) });
+  combo.addEventListener('keydown', function (e) {
+    var itens = [].slice.call(lista.querySelectorAll('li[role=option]'));
+    if (e.key === 'ArrowDown') { e.preventDefault(); marcado = Math.min(itens.length - 1, marcado + 1); pintarCombo(); lista.hidden = false }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); marcado = Math.max(0, marcado - 1); pintarCombo() }
+    else if (e.key === 'Enter' && marcado > -1 && itens[marcado]) { e.preventDefault(); escolher(itens[marcado].textContent) }
+    else if (e.key === 'Escape') fecharCombo();
+  });
+
   /* ═══════════ prévia ═══════════ */
 
   function pintarSeletorPrevia () {
@@ -763,6 +842,21 @@
     if (antes) sel.value = antes;
     if (!sel.value && estado.lotes.length) sel.value = estado.lotes[0].id;
     $('.previa-barra').hidden = !estado.lotes.length;
+    var chips = id('chips-lote');
+    chips.innerHTML = '';
+    estado.lotes.forEach(function (l) {
+      var e = espPorId(l.espId);
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip-lote' + (l.id === sel.value ? ' on' : '');
+      b.innerHTML = '<span class="bolinha" style="background:' + (e ? e.cor : '#ccc') + '"></span>';
+      b.appendChild(document.createTextNode((e ? e.nome : '—') + ' · ' + l.nomes[0] + (l.nomes.length > 1 ? ' +' + (l.nomes.length - 1) : '')));
+      b.addEventListener('click', function () {
+        sel.value = l.id; sel.dispatchEvent(new Event('change'));
+        $$('.chip-lote').forEach(function (o) { o.classList.toggle('on', o === b) });
+      });
+      chips.appendChild(b);
+    });
   }
 
   function loteDaPrevia () {
@@ -799,6 +893,17 @@
   }
 
   id('previa-lote').addEventListener('change', pintarPrevia);
+
+  function ampliar () {
+    id('zoom-img').src = id('previa').toDataURL('image/png');
+    id('zoom').hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function fecharZoom () { id('zoom').hidden = true; document.body.style.overflow = '' }
+  id('previa-moldura').addEventListener('click', ampliar);
+  id('previa-moldura').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ampliar() } });
+  id('zoom').addEventListener('click', function (e) { if (e.target.id !== 'zoom-img') fecharZoom() });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharZoom() });
 
   id('bt-png-um').addEventListener('click', function () {
     var cv = id('previa');
