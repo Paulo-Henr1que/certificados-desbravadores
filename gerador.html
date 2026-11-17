@@ -8,7 +8,7 @@
 <meta name="description" content="Gerador de certificados de especialidade para clubes de Desbravadores. Lotes em massa, PDF e PNG.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="css/estilo.css?v=24">
 </head>
 <body>
@@ -195,6 +195,15 @@
         <h3>Saída</h3>
 
         <label class="campo">
+          <span>Modelo do certificado</span>
+          <select id="modelo">
+            <option value="classico" selected data-t="Modelo 1" data-s="clássico">Modelo 1</option>
+            <option value="compacto" data-t="Modelo 2" data-s="moderno">Modelo 2</option>
+            <option value="moderno" data-t="Modelo 3" data-s="grande (A4)">Modelo 3</option>
+          </select>
+        </label>
+
+        <label class="campo">
           <span>Certificados por página</span>
           <select id="por-pagina">
             <option value="2" selected data-t="2 por folha" data-s="A4 deitada">2 por página (A4 deitada)</option>
@@ -285,7 +294,8 @@
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jszip.min.js"></script>
-<script src="js/app.js?v=13"></script>
+<script src="js/modelo-moderno.js?v=3"></script>
+<script src="js/app.js?v=15"></script>
 <script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 </body>
 </html>

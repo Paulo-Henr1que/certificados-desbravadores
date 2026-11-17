@@ -9,7 +9,7 @@
 
   var CHAVE = 'desbravadores-certificados-v1';
   function novoId () { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
-  var estado = { especialidades: [], lotes: [], temLogo: false };
+  var estado = { especialidades: [], lotes: [], temLogo: false, modelo: 'classico' };
 
   function salvar () {
     try { localStorage.setItem(CHAVE, JSON.stringify(estado)) }
@@ -19,7 +19,7 @@
   /* limpa o que vier do armazenamento ou de um backup: tipos errados,
      cores inválidas, lotes órfãos. Nada disso pode derrubar a página. */
   function sanear (cru) {
-    var limpo = { especialidades: [], lotes: [], temLogo: false };
+    var limpo = { especialidades: [], lotes: [], temLogo: false, modelo: 'classico' };
     if (!cru || typeof cru !== 'object') return limpo;
     (Array.isArray(cru.especialidades) ? cru.especialidades : []).forEach(function (e) {
       if (!e || typeof e.nome !== 'string' || !e.nome.trim() || !e.id) return;
@@ -43,6 +43,7 @@
       });
     });
     limpo.temLogo = !!cru.temLogo;
+    limpo.modelo = ['classico', 'compacto', 'moderno'].indexOf(cru.modelo) > -1 ? cru.modelo : 'classico';
     return limpo;
   }
   function carregar () {
@@ -370,6 +371,16 @@
     ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.lineWidth = Math.max(1, 0.010 * H);
     ctx.beginPath(); ctx.ellipse(cx, cy, rx * 1.065, ry * 1.055, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  /* ═══════════ modelos ═══════════ */
+  /* clássico: faixa 2,70:1 · moderno: A4 deitada (297 x 210) */
+  function moderno () { return estado.modelo === 'moderno' && typeof window.desenharModerno === 'function' }
+  function proporcao () { return moderno() ? 297 / 210 : PROPORCAO }
+  function desenharAtual (ctx, W, H, d) {
+    if (moderno()) window.desenharModerno(ctx, W, H, d, nomeQueCabe);
+    else if (estado.modelo === 'compacto' && typeof window.desenharCompacto === 'function') window.desenharCompacto(ctx, W, H, d, nomeQueCabe, escurecer);
+    else desenhar(ctx, W, H, d);
   }
 
   /* ═══════════ dados derivados ═══════════ */
@@ -934,11 +945,13 @@
 
   function pintarPrevia () {
     var cv = id('previa');
+    var altPrevia = Math.round(cv.width / proporcao());
+    if (cv.height !== altPrevia) cv.height = altPrevia;
     var ctx = cv.getContext('2d');
     var l = loteDaPrevia();
 
     if (!l) {
-      desenhar(ctx, cv.width, cv.height, {
+      desenharAtual(ctx, cv.width, cv.height, {
         cor: '#08A008', especialidade: 'Ecologia', nome: 'Miguel Félix',
         data: '___ / ___ / 2026', botao: null, logo: cacheImg.logo || null,
       });
@@ -949,7 +962,7 @@
       imagemDe(e ? e.imgId : null),
       estado.temLogo ? imagemDe('logo') : Promise.resolve(null),
     ]).then(function (r) {
-      desenhar(ctx, cv.width, cv.height, {
+      desenharAtual(ctx, cv.width, cv.height, {
         cor: e ? e.cor : '#08A008',
         especialidade: e ? e.nome : '',
         nome: l.nomes[0],
@@ -1007,7 +1020,7 @@
 
   /* desenha um certificado e devolve o dataURL */
   function render (cv, ctx, item, logo, botao, formato, q) {
-    desenhar(ctx, cv.width, cv.height, {
+    desenharAtual(ctx, cv.width, cv.height, {
       cor: item.cor, especialidade: item.especialidade,
       nome: item.nome, data: item.data, botao: botao, logo: logo,
     });
@@ -1020,6 +1033,11 @@
     '2': { orient: 'landscape', fmt: 'a4', larg: 235, margemX: 31, topo: 11, gap: 10 },
     '3': { orient: 'portrait', fmt: 'a4', larg: 186, margemX: 12, topo: 22, gap: 12 },
   };
+  /* modelo moderno (A4): página inteira deitada, ou dois em pé */
+  var LAYOUTS_MODERNO = {
+    '1': { orient: 'landscape', fmt: 'a4', larg: 277, margemX: 10, topo: 10, gap: 0 },
+    '2': { orient: 'portrait', fmt: 'a4', larg: 190, margemX: 10, topo: 10, gap: 8 },
+  };
 
   function gerarPdf () {
     if (!window.jspdf || !window.JSZip) { aviso('Não carregou o gerador de PDF. Recarregue a página.', true); return }
@@ -1028,11 +1046,12 @@
 
     var conf = QUALIDADE[id('qualidade').value];
     var porPagina = id('por-pagina').value;
-    var lay = LAYOUTS[porPagina];
+    if (moderno() && porPagina === '3') porPagina = '2';
+    var lay = (moderno() ? LAYOUTS_MODERNO : LAYOUTS)[porPagina];
     var separar = id('separar').value;
 
     var cv = document.createElement('canvas');
-    cv.width = conf.w; cv.height = Math.round(conf.w / PROPORCAO);
+    cv.width = conf.w; cv.height = Math.round(conf.w / proporcao());
     var ctx = cv.getContext('2d');
 
     var grupos = {};
@@ -1059,7 +1078,7 @@
         cadeia = cadeia.then(function () {
           if (cancelar) return;
           var doc = new window.jspdf.jsPDF({ orientation: lay.orient, unit: 'mm', format: lay.fmt });
-          var altCert = lay.larg / PROPORCAO;
+          var altCert = lay.larg / proporcao();
           var porPag = parseInt(porPagina, 10);
           var lista = grupos[g];
           var passo = Promise.resolve();
@@ -1120,7 +1139,7 @@
 
     var conf = QUALIDADE[id('qualidade').value];
     var cv = document.createElement('canvas');
-    cv.width = conf.w; cv.height = Math.round(conf.w / PROPORCAO);
+    cv.width = conf.w; cv.height = Math.round(conf.w / proporcao());
     var ctx = cv.getContext('2d');
 
     cancelar = false;
@@ -1254,7 +1273,8 @@
 
   /* ═══════════ opções em cartões no lugar das listas nativas ═══════════ */
 
-  ['por-pagina', 'qualidade', 'separar'].forEach(function (k) {
+  id('modelo').value = estado.modelo;
+  ['modelo', 'por-pagina', 'qualidade', 'separar'].forEach(function (k) {
     var sel = id(k);
     if (!sel) return;
     var grade = document.createElement('div');
@@ -1283,6 +1303,27 @@
     sel.parentNode.insertBefore(grade, sel.nextSibling);
     marcar();
   });
+
+  /* modelo escolhido: ajusta as opções de folha e redesenha */
+  function ajustarFolhas () {
+    var m = moderno();
+    var grade = id('por-pagina').nextElementSibling;
+    if (!grade) return;
+    [].forEach.call(grade.children, function (b) {
+      if (b.dataset.v === '3') b.hidden = m;
+      if (b.dataset.v === '2') b.lastChild.textContent = m ? 'A4 em pé' : 'A4 deitada';
+    });
+    grade.className = 'opcoes opcoes-' + (m ? 2 : 3);
+    if (m && id('por-pagina').value === '3') { id('por-pagina').value = '2'; id('por-pagina').dispatchEvent(new Event('change')) }
+    [].forEach.call(grade.children, function (b) { b.classList.toggle('on', b.dataset.v === id('por-pagina').value) });
+  }
+  id('modelo').addEventListener('change', function () {
+    estado.modelo = ['classico', 'compacto', 'moderno'].indexOf(this.value) > -1 ? this.value : 'classico';
+    salvar(); ajustarFolhas(); pintarPrevia();
+  });
+  ajustarFolhas();
+  if (window.emblemaModerno) window.emblemaModerno.addEventListener('load', function () { pintarPrevia() });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { pintarPrevia() });
 
   /* ═══════════ pintura geral ═══════════ */
 
