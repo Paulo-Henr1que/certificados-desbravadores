@@ -8,32 +8,68 @@
   /* ═══════════ guarda de dados ═══════════ */
 
   var CHAVE = 'desbravadores-certificados-v1';
+  function novoId () { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
   var estado = { especialidades: [], lotes: [], temLogo: false };
 
   function salvar () {
     try { localStorage.setItem(CHAVE, JSON.stringify(estado)) }
     catch (e) { aviso('Não deu para salvar neste navegador. Faça um backup.', true) }
   }
+  var HEX = /^#[0-9a-fA-F]{6}$/;
+  /* limpa o que vier do armazenamento ou de um backup: tipos errados,
+     cores inválidas, lotes órfãos. Nada disso pode derrubar a página. */
+  function sanear (cru) {
+    var limpo = { especialidades: [], lotes: [], temLogo: false };
+    if (!cru || typeof cru !== 'object') return limpo;
+    (Array.isArray(cru.especialidades) ? cru.especialidades : []).forEach(function (e) {
+      if (!e || typeof e.nome !== 'string' || !e.nome.trim() || !e.id) return;
+      limpo.especialidades.push({
+        id: String(e.id), nome: e.nome.trim().slice(0, 80),
+        cor: HEX.test(e.cor) ? e.cor : '#08A008',
+        imgId: e.imgId ? String(e.imgId) : null,
+      });
+    });
+    var ids = {};
+    limpo.especialidades.forEach(function (e) { ids[e.id] = true });
+    (Array.isArray(cru.lotes) ? cru.lotes : []).forEach(function (l) {
+      if (!l || !ids[l.espId] || !Array.isArray(l.nomes)) return;
+      var nomes = l.nomes.filter(function (x) { return typeof x === 'string' && x.trim() })
+        .map(function (x) { return x.trim().slice(0, 140) });
+      if (!nomes.length) return;
+      limpo.lotes.push({
+        id: String(l.id || novoId()), espId: l.espId, nomes: nomes,
+        tipoData: ['branco', 'ano', 'cheia'].indexOf(l.tipoData) > -1 ? l.tipoData : 'branco',
+        dia: String(l.dia || '').slice(0, 2), mes: String(l.mes || '').slice(0, 2), ano: String(l.ano || '').slice(0, 4),
+      });
+    });
+    limpo.temLogo = !!cru.temLogo;
+    return limpo;
+  }
   function carregar () {
     try {
       var cru = localStorage.getItem(CHAVE);
-      if (cru) estado = Object.assign(estado, JSON.parse(cru));
-    } catch (e) { /* começa limpo */ }
+      if (cru) estado = sanear(JSON.parse(cru));
+    } catch (e) { estado = sanear(null) }
   }
 
   /* IndexedDB só para as imagens */
-  var bd = null;
+  var bd = null, semBd = false, memoria = {};
   function abrirBd () {
     return new Promise(function (ok, erro) {
       if (bd) return ok(bd);
-      var req = indexedDB.open('desbravadores-img', 1);
-      req.onupgradeneeded = function () { req.result.createObjectStore('img') };
-      req.onsuccess = function () { bd = req.result; ok(bd) };
-      req.onerror = function () { erro(req.error) };
+      if (semBd) return erro(new Error('sem IndexedDB'));
+      try {
+        var req = indexedDB.open('desbravadores-img', 1);
+        req.onupgradeneeded = function () { req.result.createObjectStore('img') };
+        req.onsuccess = function () { bd = req.result; ok(bd) };
+        req.onerror = req.onblocked = function () { semBd = true; erro(req.error || new Error('bloqueado')) };
+      } catch (e) { semBd = true; erro(e) }
     });
   }
   function guardarImg (id, dataUrl) {
-    return abrirBd().then(function (b) {
+    memoria[id] = dataUrl;
+    return abrirBd().catch(function () { return null }).then(function (b) {
+      if (!b) return;
       return new Promise(function (ok, erro) {
         var t = b.transaction('img', 'readwrite');
         t.objectStore('img').put(dataUrl, id);
@@ -42,16 +78,19 @@
     });
   }
   function lerImg (id) {
-    return abrirBd().then(function (b) {
+    return abrirBd().catch(function () { return null }).then(function (b) {
+      if (!b) return memoria[id] || null;
       return new Promise(function (ok) {
         var r = b.transaction('img', 'readonly').objectStore('img').get(id);
-        r.onsuccess = function () { ok(r.result || null) };
+        r.onsuccess = function () { ok(r.result || memoria[id] || null) };
         r.onerror = function () { ok(null) };
       });
     });
   }
   function apagarImg (id) {
-    return abrirBd().then(function (b) {
+    delete memoria[id];
+    return abrirBd().catch(function () { return null }).then(function (b) {
+      if (!b) return;
       return new Promise(function (ok) {
         var t = b.transaction('img', 'readwrite');
         t.objectStore('img').delete(id);
@@ -81,8 +120,6 @@
   var $ = function (s) { return document.querySelector(s) };
   var $$ = function (s) { return [].slice.call(document.querySelectorAll(s)) };
   var id = function (s) { return document.getElementById(s) };
-
-  function novoId () { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
 
   var tAviso;
   function aviso (txt, erro) {
@@ -955,6 +992,7 @@
   };
 
   function gerarPdf () {
+    if (!window.jspdf || !window.JSZip) { aviso('Não carregou o gerador de PDF. Recarregue a página.', true); return }
     var itens = todosOsCertificados();
     if (!itens.length) { aviso('Não há certificados para gerar.', true); return }
 
@@ -1045,6 +1083,7 @@
   }
 
   function gerarZip () {
+    if (!window.JSZip) { aviso('Não carregou o gerador de ZIP. Recarregue a página.', true); return }
     var itens = todosOsCertificados();
     if (!itens.length) { aviso('Não há certificados para gerar.', true); return }
     if (itens.length > 250 && !confirm(itens.length + ' imagens PNG dão um arquivo grande e podem travar o navegador. Em geral o PDF resolve melhor. Continuar mesmo assim?')) return;
@@ -1135,7 +1174,7 @@
         var imgs = p.imagens || {};
         Promise.all(Object.keys(imgs).map(function (i) { return guardarImg(i, imgs[i]) }))
           .then(function () {
-            estado = p.estado;
+            estado = sanear(p.estado);
             cacheImg = {};
             salvar(); pintarTudo();
             aviso('Backup restaurado.');
@@ -1179,6 +1218,15 @@
     pintarPlacar();
     pintarPrevia();
   }
+
+  /* ═══════════ erros inesperados ═══════════ */
+
+  window.addEventListener('error', function () {
+    aviso('Algo deu errado. Recarregue a página; seus dados continuam salvos.', true);
+  });
+  window.addEventListener('unhandledrejection', function () {
+    aviso('Algo deu errado. Recarregue a página; seus dados continuam salvos.', true);
+  });
 
   /* ═══════════ início ═══════════ */
 
