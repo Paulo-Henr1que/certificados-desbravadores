@@ -488,9 +488,9 @@
     id('bt-cancelar-esp').hidden = true;
   }
 
-  function removerEsp (i) {
+  function removerEsp (i, ok) {
     var usada = estado.lotes.some(function (l) { return l.espId === i });
-    if (usada && !confirm('Há lotes usando esta especialidade. Eles também serão removidos. Continuar?')) return;
+    if (usada && !ok) return perguntar('Remover especialidade?', 'Há lotes usando esta especialidade. Eles também serão removidos.', 'Remover', function () { removerEsp(i, true) });
     var e = espPorId(i);
     if (e && e.imgId) { apagarImg(e.imgId); delete cacheImg[e.imgId] }
     estado.especialidades = estado.especialidades.filter(function (x) { return x.id !== i });
@@ -1082,11 +1082,11 @@
     });
   }
 
-  function gerarZip () {
+  function gerarZip (ok) {
     if (!window.JSZip) { aviso('Não carregou o gerador de ZIP. Recarregue a página.', true); return }
     var itens = todosOsCertificados();
     if (!itens.length) { aviso('Não há certificados para gerar.', true); return }
-    if (itens.length > 250 && !confirm(itens.length + ' imagens PNG dão um arquivo grande e podem travar o navegador. Em geral o PDF resolve melhor. Continuar mesmo assim?')) return;
+    if (itens.length > 250 && ok !== true) return perguntar('Arquivo grande', itens.length + ' imagens PNG dão um arquivo pesado e podem travar o navegador. Em geral o PDF resolve melhor.', 'Gerar mesmo assim', function () { gerarZip(true) });
 
     var conf = QUALIDADE[id('qualidade').value];
     var cv = document.createElement('canvas');
@@ -1145,8 +1145,16 @@
   /* ═══════════ backup ═══════════ */
 
   id('bt-backup').addEventListener('click', function () {
-    var escolha = prompt('Digite 1 para baixar um backup, ou 2 para restaurar de um arquivo.', '1');
-    if (escolha === '1') {
+    id('modal-backup').hidden = false;
+  });
+  function fecharBackup () { id('modal-backup').hidden = true }
+  id('mb-x').addEventListener('click', fecharBackup);
+  id('modal-backup').addEventListener('click', function (e) { if (e.target === this) fecharBackup() });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharBackup() });
+  id('mb-restaurar').addEventListener('click', function () { fecharBackup(); id('restaurar').click() });
+  id('mb-baixar').addEventListener('click', function () {
+    fecharBackup();
+    {
       var imgs = {};
       var ids = estado.especialidades.map(function (e) { return e.imgId }).filter(Boolean);
       if (estado.temLogo) ids.push('logo');
@@ -1158,8 +1166,6 @@
           'backup-certificados-' + new Date().toISOString().slice(0, 10) + '.json');
         aviso('Backup baixado.');
       });
-    } else if (escolha === '2') {
-      id('restaurar').click();
     }
   });
 
@@ -1182,6 +1188,51 @@
       } catch (e) { aviso('Arquivo de backup inválido.', true) }
     };
     r.readAsText(f, 'utf-8');
+  });
+
+  /* ═══════════ janela de confirmação ═══════════ */
+
+  var aoConfirmar = null;
+  function perguntar (titulo, texto, rotulo, fn) {
+    id('mc-tit').textContent = titulo; id('mc-txt').textContent = texto; id('mc-ok').textContent = rotulo;
+    aoConfirmar = fn; id('modal-conf').hidden = false; id('mc-ok').focus();
+  }
+  function fecharConf () { id('modal-conf').hidden = true; aoConfirmar = null }
+  id('mc-nao').addEventListener('click', fecharConf);
+  id('modal-conf').addEventListener('click', function (e) { if (e.target === this) fecharConf() });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharConf() });
+  id('mc-ok').addEventListener('click', function () { var f = aoConfirmar; fecharConf(); if (f) f() });
+
+  /* ═══════════ opções em cartões no lugar das listas nativas ═══════════ */
+
+  ['por-pagina', 'qualidade', 'separar'].forEach(function (k) {
+    var sel = id(k);
+    if (!sel) return;
+    var grade = document.createElement('div');
+    grade.className = 'opcoes opcoes-' + sel.options.length;
+    grade.setAttribute('role', 'radiogroup');
+    [].forEach.call(sel.options, function (o) {
+      var partes = o.textContent.split(/ — | \(/);
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opcao';
+      b.setAttribute('role', 'radio');
+      b.innerHTML = '<b></b><small></small>';
+      b.firstChild.textContent = o.dataset.t || partes[0];
+      b.lastChild.textContent = o.dataset.s || (partes[1] || '').replace(/\)$/, '');
+      b.addEventListener('click', function () { sel.value = o.value; sel.dispatchEvent(new Event('change')); marcar() });
+      b.dataset.v = o.value;
+      grade.appendChild(b);
+    });
+    function marcar () {
+      [].forEach.call(grade.children, function (b) {
+        var on = b.dataset.v === sel.value;
+        b.classList.toggle('on', on); b.setAttribute('aria-checked', on);
+      });
+    }
+    sel.hidden = true;
+    sel.parentNode.insertBefore(grade, sel.nextSibling);
+    marcar();
   });
 
   /* ═══════════ pintura geral ═══════════ */

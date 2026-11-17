@@ -446,3 +446,58 @@ textarea{
 .principal{ padding-block:30px 24px }
 .abas{ display:grid; grid-template-columns:1fr 1fr; width:100%; max-width:420px }
 .aba{ white-space:nowrap; text-align:center; padding-inline:10px }
+
+/* ═══════════ opções em cartões ═══════════ */
+.opcoes{ display:grid; gap:8px; grid-template-columns:repeat(3,minmax(0,1fr)) }
+.opcoes-2{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+.opcao{
+  display:grid; gap:2px; align-content:start; text-align:left; cursor:pointer; min-width:0;
+  padding:10px 12px; border-radius:12px; background:#fff;
+  border:1.5px solid var(--linha); color:var(--tinta);
+  font-family:'Outfit',sans-serif; transition:border-color .15s, background .15s, transform .12s;
+}
+.opcao b{ font-size:14px; font-weight:600 }
+.opcao small{ font-size:12px; color:var(--tinta-3); line-height:1.25 }
+.opcao:hover{ border-color:#B9C8DC }
+.opcao:active{ transform:scale(.98) }
+.opcao.on{ border-color:var(--azul); background:#EEF3FA; box-shadow:0 0 0 1px var(--azul) }
+.opcao.on b{ color:var(--azul) }
+
+/* ═══════════ janelas (backup e confirmação) ═══════════ */
+.modal{
+  position:fixed; inset:0; z-index:100; background:rgba(8,18,32,.6);
+  display:grid; place-items:center; padding:16px; animation:abre-pc .18s var(--ease);
+}
+.modal-caixa{
+  position:relative; width:100%; max-width:420px; background:#fff; border-radius:20px;
+  padding:24px 20px 20px; display:grid; gap:10px; box-shadow:0 30px 80px -20px rgba(0,0,0,.5);
+}
+.modal-caixa h3{ font-size:20px; color:var(--tinta); padding-right:40px }
+.modal-sub{ font-size:14px; color:var(--tinta-2); margin-bottom:4px }
+.modal-x{
+  position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%;
+  border:0; background:#EFF2F7; color:var(--tinta-2); cursor:pointer; font-size:14px;
+}
+.modal-acoes{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px }
+.modal-op{
+  display:flex; align-items:center; gap:14px; text-align:left; cursor:pointer;
+  padding:14px; border-radius:14px; border:1.5px solid var(--linha); background:#fff;
+  font-family:'Outfit',sans-serif; color:var(--tinta); transition:border-color .15s, background .15s;
+}
+.modal-op:hover{ border-color:var(--azul); background:#F5F8FC }
+.modal-op b{ display:block; font-size:15px }
+.modal-op small{ display:block; font-size:12.5px; color:var(--tinta-3); margin-top:2px }
+.mo-ic{
+  flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center;
+  background:var(--azul); color:#fff; font-size:18px; font-weight:700;
+}
+#mb-restaurar .mo-ic{ background:var(--dourado); color:var(--azul) }
+.opcao b, .opcao small{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.opcao{ padding:10px 10px }
+.opcao b{ font-size:13.5px }
+@media (max-width:480px){
+  .opcoes{ gap:6px }
+  .opcao{ padding:9px 6px; text-align:center; justify-items:center }
+  .opcao b{ font-size:13px }
+  .opcao small{ font-size:11px }
+}

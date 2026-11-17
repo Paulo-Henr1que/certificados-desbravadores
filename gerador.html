@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/estilo.css?v=9">
+<link rel="stylesheet" href="css/estilo.css?v=12">
 </head>
 <body>
 
@@ -195,26 +195,26 @@
         <label class="campo">
           <span>Certificados por página</span>
           <select id="por-pagina">
-            <option value="2" selected>2 por página (A4 deitada)</option>
-            <option value="1">1 por página (A4 deitada)</option>
-            <option value="3">3 por página (A4 em pé)</option>
+            <option value="2" selected data-t="2 por folha" data-s="A4 deitada">2 por página (A4 deitada)</option>
+            <option value="1" data-t="1 por folha" data-s="A4 deitada">1 por página (A4 deitada)</option>
+            <option value="3" data-t="3 por folha" data-s="A4 em pé">3 por página (A4 em pé)</option>
           </select>
         </label>
 
         <label class="campo">
           <span>Qualidade</span>
           <select id="qualidade">
-            <option value="alta">Alta — para imprimir</option>
-            <option value="boa" selected>Boa — equilíbrio</option>
-            <option value="leve">Leve — arquivo menor</option>
+            <option value="alta" data-t="Alta" data-s="para imprimir">Alta — para imprimir</option>
+            <option value="boa" selected data-t="Boa" data-s="equilíbrio">Boa — equilíbrio</option>
+            <option value="leve" data-t="Leve" data-s="arquivo menor">Leve — arquivo menor</option>
           </select>
         </label>
 
         <label class="campo">
           <span>Como separar</span>
           <select id="separar">
-            <option value="especialidade" selected>Um PDF por especialidade</option>
-            <option value="unico">Um PDF único com tudo</option>
+            <option value="especialidade" selected data-t="Por especialidade" data-s="um PDF para cada">Um PDF por especialidade</option>
+            <option value="unico" data-t="Tudo junto" data-s="um PDF só">Um PDF único com tudo</option>
           </select>
         </label>
 
@@ -248,6 +248,27 @@
   </div>
 </footer>
 
+<div class="modal" id="modal-backup" hidden role="dialog" aria-modal="true" aria-labelledby="mb-tit">
+  <div class="modal-caixa">
+    <button class="modal-x" id="mb-x" aria-label="Fechar">✕</button>
+    <h3 id="mb-tit">Backup</h3>
+    <p class="modal-sub">Leve suas especialidades, botons e lotes para outro computador.</p>
+    <button class="modal-op" id="mb-baixar"><span class="mo-ic">↓</span><span><b>Baixar backup</b><small>Salva um arquivo com tudo que está aqui.</small></span></button>
+    <button class="modal-op" id="mb-restaurar"><span class="mo-ic">↑</span><span><b>Restaurar backup</b><small>Abre um arquivo salvo antes. Substitui os dados atuais.</small></span></button>
+  </div>
+</div>
+
+<div class="modal" id="modal-conf" hidden role="alertdialog" aria-modal="true" aria-labelledby="mc-tit">
+  <div class="modal-caixa">
+    <h3 id="mc-tit"></h3>
+    <p class="modal-sub" id="mc-txt"></p>
+    <div class="modal-acoes">
+      <button class="bt bt-linha" id="mc-nao">Cancelar</button>
+      <button class="bt bt-ouro" id="mc-ok">Continuar</button>
+    </div>
+  </div>
+</div>
+
 <div class="zoom" id="zoom" hidden>
   <button class="zoom-x" id="zoom-x" aria-label="Fechar">✕</button>
   <img id="zoom-img" alt="Certificado ampliado">
@@ -259,7 +280,7 @@
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jszip.min.js"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/app.js?v=9"></script>
 <script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 </body>
 </html>
