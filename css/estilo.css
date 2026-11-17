@@ -569,3 +569,17 @@ textarea{
 @media (prefers-reduced-motion:reduce){ .bolha, .selo{ animation:none } }
 .b1{ opacity:.42 } .b2{ opacity:.5 } .b3{ opacity:.26 } .b4{ opacity:.3 }
 .selo{ opacity:.11 }
+.s4{ top:30%; left:44%; width:150px; animation:flutua 24s ease-in-out infinite -3s }
+.s5{ bottom:14%; left:12%; width:120px; animation:flutua 20s ease-in-out infinite -9s }
+@media (max-width:700px){ .s4{ width:100px; left:auto; right:4% } .s5{ display:none } }
+/* emblemas nas margens livres, fora das caixas */
+.selo{ width:120px; opacity:.16 }
+.s1{ top:14%;  right:-20px; left:auto; bottom:auto }
+.s2{ top:58%;  left:-24px;  right:auto; bottom:auto; width:120px }
+.s3{ top:auto; bottom:6%;   right:-16px; left:auto; width:110px }
+.s4{ top:22%;  left:-18px;  right:auto; width:120px }
+.s5{ top:46%;  right:-22px; left:auto; bottom:auto; width:120px }
+@media (max-width:700px){
+  .selo{ width:80px; opacity:.14 } .s3,.s5{ display:none }
+  .s4{ width:80px; left:-30px; right:auto }
+}
