@@ -347,90 +347,148 @@
     ctx.restore();
   }
 
+  /* mistura a cor com branco (f = 0 a 1): tons claros da moldura */
+  function clarear (hex, f) {
+    var n = parseInt(hex.slice(1), 16);
+    var r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return 'rgb(' + Math.round(r + (255 - r) * f) + ',' + Math.round(g + (255 - g) * f) + ',' + Math.round(b + (255 - b) * f) + ')';
+  }
+
+  /* Modelo 1: mesma estrutura de sempre (logo no painel colorido, curva,
+     oval do boton à direita), com acabamento novo: degradê na cor da
+     especialidade, textura sutil, fio dourado na curva, título refinado,
+     selo duplo no oval. Tudo segue a cor escolhida. */
   function desenhar (ctx, W, H, d) {
-    var cor = d.cor || '#08A008';
+    var cor = d.cor || '#08A008', escuro = escurecer(cor);
+    var OURO = '#E8B923', TINTA = '#1E232B', CINZA = '#5B6472';
+    var TIT = 'Outfit, "Open Sans", Arial, sans-serif';
     ctx.clearRect(0, 0, W, H);
 
-    // moldura colorida
-    ctx.fillStyle = cor;
-    ctx.fillRect(0, 0, W, H);
+    // moldura: degradê da cor para o tom escuro
+    var gm = ctx.createLinearGradient(0, 0, W * 0.35, H);
+    gm.addColorStop(0, cor); gm.addColorStop(1, escuro);
+    ctx.fillStyle = gm; ctx.fillRect(0, 0, W, H);
 
-    // área branca como no modelo: borda verde fina em volta, faixa de
-    // cima mais grossa à esquerda (onde fica a logo) e a curva que desce
-    // do canto da logo até o pé esquerdo.
+    // textura de listras finas na moldura
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 0.012 * H;
+    for (var k = -H; k < W; k += 0.05 * H) { ctx.beginPath(); ctx.moveTo(k, H); ctx.lineTo(k + H, 0); ctx.stroke() }
+    ctx.restore();
+
+    // área clara com a curva do modelo
     var b = 0.035 * H;
-    ctx.beginPath();
-    ctx.moveTo(0.215 * W, 0.15 * H);
-    ctx.bezierCurveTo(0.45 * W, 0.11 * H, 0.75 * W, b, W - b, b);
-    ctx.lineTo(W - b, H - b);
-    ctx.lineTo(0.05 * W, H - b);
-    ctx.bezierCurveTo(0.085 * W, 0.62 * H, 0.12 * W, 0.26 * H, 0.215 * W, 0.15 * H);
-    ctx.closePath();
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fill();
+    function curva () {
+      ctx.beginPath();
+      ctx.moveTo(0.215 * W, 0.15 * H);
+      ctx.bezierCurveTo(0.45 * W, 0.11 * H, 0.75 * W, b, W - b, b);
+      ctx.lineTo(W - b, H - b);
+      ctx.lineTo(0.05 * W, H - b);
+      ctx.bezierCurveTo(0.085 * W, 0.62 * H, 0.12 * W, 0.26 * H, 0.215 * W, 0.15 * H);
+      ctx.closePath();
+    }
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 0.05 * H; ctx.shadowOffsetX = -0.006 * H;
+    curva();
+    var gb = ctx.createLinearGradient(0, 0, W, H);
+    gb.addColorStop(0, '#FFFFFF'); gb.addColorStop(1, '#F6F7F4');
+    ctx.fillStyle = gb; ctx.fill();
+    ctx.restore();
 
-    // logo no canto verde, sempre na proporção original
+    // brilho suave na cor da especialidade atrás do oval
+    ctx.save();
+    curva(); ctx.clip();
+    var rg = ctx.createRadialGradient(0.834 * W, 0.6 * H, 0, 0.834 * W, 0.6 * H, 0.32 * W);
+    rg.addColorStop(0, clarear(cor, 0.86)); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    // fio dourado acompanhando a curva, por dentro
+    ctx.save();
+    curva(); ctx.clip();
+    ctx.strokeStyle = OURO; ctx.lineWidth = 0.02 * H;
+    curva(); ctx.stroke();
+    ctx.restore();
+
+    // logo no painel colorido, sempre na proporção original
     var lg = d.logo || logoPadrao;
     if (lg && lg.naturalWidth) {
       var lh = 0.40 * H, lw = lh * (lg.naturalWidth / lg.naturalHeight);
       if (lw > 0.115 * W) { lw = 0.115 * W; lh = lw * (lg.naturalHeight / lg.naturalWidth) }
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 0.03 * H;
       ctx.drawImage(lg, 0.075 * W - lw / 2, 0.055 * H, lw, lh);
+      ctx.restore();
     }
-
-    var tinta = '#1B1B1B';
 
     // O oval fica em 0,834W: todo texto tem de caber à esquerda dele.
     var limite = 0.705 * W;
 
-    // título fixo
-    texto(ctx, 'Certificado de Especialidade', 0.500 * W, 0.312 * H,
-      Math.round(0.111 * H), '400', tinta, 'center', 0.56 * W);
+    // título: espaçado, discreto, com fios dourados dos lados
+    ctx.font = '500 ' + Math.round(0.082 * H) + 'px ' + TIT;
+    var tit = 'CERTIFICADO DE ESPECIALIDADE', esp = 0.012 * H, larg = 0;
+    for (var i = 0; i < tit.length; i++) larg += ctx.measureText(tit[i]).width + (i ? esp : 0);
+    var tx = 0.5 * W - larg / 2;
+    ctx.fillStyle = CINZA; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    for (var j = 0; j < tit.length; j++) { ctx.fillText(tit[j], tx, 0.300 * H); tx += ctx.measureText(tit[j]).width + esp }
+    ctx.strokeStyle = OURO; ctx.lineWidth = Math.max(1, 0.008 * H);
+    ctx.beginPath();
+    ctx.moveTo(0.5 * W - larg / 2 - 0.05 * W, 0.272 * H); ctx.lineTo(0.5 * W - larg / 2 - 0.012 * W, 0.272 * H);
+    ctx.moveTo(0.5 * W + larg / 2 + 0.012 * W, 0.272 * H); ctx.lineTo(0.5 * W + larg / 2 + 0.05 * W, 0.272 * H);
+    ctx.stroke();
 
-    // nome da especialidade
-    texto(ctx, d.especialidade || '', 0.500 * W, 0.448 * H,
-      Math.round(0.118 * H), '700', escurecer(cor), 'center', 0.44 * W);
+    // nome da especialidade, forte, no tom escuro da cor
+    ctx.font = '700 ' + Math.round(0.135 * H) + 'px ' + TIT;
+    texto(ctx, '', 0, 0, 1, '400', TINTA, 'left'); // reseta estilos
+    var tamEsp = Math.round(0.135 * H);
+    ctx.font = '700 ' + tamEsp + 'px ' + TIT;
+    while (ctx.measureText(d.especialidade || '').width > 0.44 * W && tamEsp > 10) { tamEsp--; ctx.font = '700 ' + tamEsp + 'px ' + TIT }
+    ctx.fillStyle = escuro; ctx.textAlign = 'center';
+    ctx.fillText(d.especialidade || '', 0.5 * W, 0.462 * H);
 
     // desbravador
     var rotulo = 'Desbravador: ';
-    var tamNome = Math.round(0.098 * H);
+    var tamNome = Math.round(0.092 * H);
     ctx.font = '400 ' + tamNome + 'px "Open Sans", Calibri, Arial, sans-serif';
     var larguraRot = ctx.measureText(rotulo).width;
     var xNome = 0.135 * W;
     var espaco = limite - (xNome + larguraRot);
     var nome = nomeQueCabe(ctx, d.nome || '', espaco, tamNome);
-    texto(ctx, rotulo, xNome, 0.630 * H, tamNome, '400', tinta, 'left');
-    texto(ctx, nome, xNome + larguraRot, 0.630 * H,
-      tamNome, '400', tinta, 'left', espaco);
+    texto(ctx, rotulo, xNome, 0.630 * H, tamNome, '400', CINZA, 'left');
+    texto(ctx, nome, xNome + larguraRot, 0.630 * H, tamNome, '700', TINTA, 'left', espaco);
 
     // data
-    texto(ctx, d.data || '', 0.148 * W, 0.748 * H,
-      Math.round(0.070 * H), '400', tinta, 'left', 0.34 * W);
+    texto(ctx, d.data || '', 0.148 * W, 0.748 * H, Math.round(0.066 * H), '400', CINZA, 'left', 0.34 * W);
 
-    // linha de assinatura
-    ctx.strokeStyle = '#2B2B2B';
-    ctx.lineWidth = Math.max(1, 0.008 * H);
-    ctx.beginPath();
-    ctx.moveTo(0.372 * W, 0.868 * H);
-    ctx.lineTo(0.700 * W, 0.868 * H);
-    ctx.stroke();
-    texto(ctx, '(Instrutor)', 0.536 * W, 0.942 * H,
-      Math.round(0.058 * H), '400', tinta, 'center');
+    // assinatura
+    ctx.strokeStyle = '#3A3F47';
+    ctx.lineWidth = Math.max(1, 0.006 * H);
+    ctx.beginPath(); ctx.moveTo(0.372 * W, 0.868 * H); ctx.lineTo(0.700 * W, 0.868 * H); ctx.stroke();
+    ctx.fillStyle = OURO;
+    ctx.beginPath(); ctx.arc(0.536 * W, 0.868 * H, 0.012 * H, 0, Math.PI * 2); ctx.fill();
+    texto(ctx, '(Instrutor)', 0.536 * W, 0.942 * H, Math.round(0.055 * H), '600', CINZA, 'center');
 
-    // oval do boton da especialidade
+    // oval do boton: selo com anel na cor e fio dourado
     var cx = 0.834 * W, cy = 0.600 * H, rx = 0.103 * W, ry = 0.222 * H;
     ctx.save();
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 0.05 * H; ctx.shadowOffsetY = 0.01 * H;
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx * 1.09, ry * 1.08, 0, 0, Math.PI * 2);
     ctx.fillStyle = '#FFFFFF'; ctx.fill();
     ctx.restore();
 
     if (d.botao) dentroDoOval(ctx, d.botao, cx, cy, rx * 0.885, ry * 0.885);
+    else {
+      ctx.fillStyle = clarear(cor, 0.93);
+      ctx.beginPath(); ctx.ellipse(cx, cy, rx * 0.86, ry * 0.86, 0, 0, Math.PI * 2); ctx.fill();
+    }
 
-    ctx.strokeStyle = cor;
-    ctx.lineWidth = Math.max(2, 0.030 * H);
+    var ga = ctx.createLinearGradient(cx - rx, cy - ry, cx + rx, cy + ry);
+    ga.addColorStop(0, cor); ga.addColorStop(1, escuro);
+    ctx.strokeStyle = ga;
+    ctx.lineWidth = Math.max(2, 0.034 * H);
     ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.lineWidth = Math.max(1, 0.010 * H);
-    ctx.beginPath(); ctx.ellipse(cx, cy, rx * 1.065, ry * 1.055, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = OURO;
+    ctx.lineWidth = Math.max(1, 0.008 * H);
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx * 1.065, ry * 1.058, 0, 0, Math.PI * 2); ctx.stroke();
   }
 
   /* ═══════════ modelos ═══════════ */
