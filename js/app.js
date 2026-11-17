@@ -1175,12 +1175,19 @@
   /* ═══════════ backup ═══════════ */
 
   id('bt-backup').addEventListener('click', function () {
+    var p = lerPref();
+    id('mb-reativar').hidden = !(p.lote || p.esp);
     id('modal-backup').hidden = false;
   });
   function fecharBackup () { id('modal-backup').hidden = true }
   id('mb-x').addEventListener('click', fecharBackup);
   id('modal-backup').addEventListener('click', function (e) { if (e.target === this) fecharBackup() });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharBackup() });
+  id('mb-reativar').addEventListener('click', function () {
+    try { localStorage.removeItem(CHAVE_PREF) } catch (e) {}
+    this.hidden = true;
+    aviso('Pronto. A confirmação antes de excluir voltou.');
+  });
   id('mb-restaurar').addEventListener('click', function () { fecharBackup(); id('restaurar').click() });
   id('mb-baixar').addEventListener('click', function () {
     fecharBackup();

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/estilo.css?v=16">
+<link rel="stylesheet" href="css/estilo.css?v=17">
 </head>
 <body>
 
@@ -255,6 +255,7 @@
     <p class="modal-sub">Leve suas especialidades, botons e lotes para outro computador.</p>
     <button class="modal-op" id="mb-baixar"><span class="mo-ic">↓</span><span><b>Baixar backup</b><small>Salva um arquivo com tudo que está aqui.</small></span></button>
     <button class="modal-op" id="mb-restaurar"><span class="mo-ic">↑</span><span><b>Restaurar backup</b><small>Abre um arquivo salvo antes. Substitui os dados atuais.</small></span></button>
+    <button type="button" class="reativar" id="mb-reativar" hidden>Voltar a pedir confirmação antes de excluir</button>
   </div>
 </div>
 
@@ -281,7 +282,7 @@
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jszip.min.js"></script>
-<script src="js/app.js?v=12"></script>
+<script src="js/app.js?v=13"></script>
 <script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 </body>
 </html>

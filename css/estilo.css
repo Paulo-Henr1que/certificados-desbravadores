@@ -535,3 +535,7 @@ textarea{
 .lembrar input:checked + .caixinha::after{ opacity:1 }
 .lembrar input:focus-visible + .caixinha{ box-shadow:0 0 0 3px rgba(0,75,135,.25) }
 #mc-ok.perigo{ background:var(--vermelho); color:#fff }
+.reativar{
+  border:0; background:none; cursor:pointer; padding:6px 0 0; justify-self:center;
+  color:var(--azul-3); font:600 13.5px 'Outfit',sans-serif; text-decoration:underline; text-underline-offset:3px;
+}
