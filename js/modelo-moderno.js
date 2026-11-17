@@ -227,7 +227,7 @@
     if (emblema.naturalWidth) encaixar(ctx, emblema, 0.022 * W, 0.69 * H, 0.19 * W, 0.29 * H);
 
     // boton no lugar do QR code: quadro branco
-    quadroBoton(ctx, H, 0.765 * W, 0.735 * H, 0.213 * W, 0.23 * H, d, d.cor || '#08A008');
+    quadroBoton(ctx, H, 0.765 * W, 0.735 * H, 0.213 * W, 0.23 * H, d);
   };
 
   /* Modelo 2 "Compacto": mesmo estilo do grande, no formato da faixa
@@ -283,8 +283,10 @@
     ctx.beginPath();
     ctx.moveTo(cx - fw / 2 - n, fy - fh / 2); ctx.lineTo(cx + fw / 2 + n, fy - fh / 2); ctx.lineTo(cx + fw / 2, fy);
     ctx.lineTo(cx + fw / 2 + n, fy + fh / 2); ctx.lineTo(cx - fw / 2 - n, fy + fh / 2); ctx.lineTo(cx - fw / 2, fy); ctx.closePath();
-    ctx.fillStyle = AZUL; ctx.fill();
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = d.cor || AZUL; ctx.fill();
+    var nc = parseInt((d.cor || '#1F3C88').slice(1), 16);
+    var lc = (0.299 * ((nc >> 16) & 255) + 0.587 * ((nc >> 8) & 255) + 0.114 * (nc & 255)) / 255;
+    ctx.fillStyle = lc > 0.62 ? '#1B1B1B' : '#FFFFFF';
     ctx.font = '700 ' + Math.round(0.054 * H) + 'px ' + TITULO;
     espacado(ctx, 'ESPECIALIDADE', cx, fy + 0.019 * H, 0.007 * H);
 

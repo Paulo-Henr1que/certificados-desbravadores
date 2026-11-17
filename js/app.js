@@ -464,7 +464,6 @@
     ctx.lineWidth = Math.max(1, 0.006 * H);
     ctx.beginPath(); ctx.moveTo(0.372 * W, 0.868 * H); ctx.lineTo(0.700 * W, 0.868 * H); ctx.stroke();
     ctx.fillStyle = OURO;
-    ctx.beginPath(); ctx.arc(0.536 * W, 0.868 * H, 0.012 * H, 0, Math.PI * 2); ctx.fill();
     texto(ctx, '(Instrutor)', 0.536 * W, 0.942 * H, Math.round(0.055 * H), '600', CINZA, 'center');
 
     // oval do boton: selo com anel na cor e fio dourado
