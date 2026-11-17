@@ -509,8 +509,10 @@
 
   function removerEsp (i, ok) {
     var usada = estado.lotes.some(function (l) { return l.espId === i });
-    if (usada && !ok) return perguntar('Remover especialidade?', 'Há lotes usando esta especialidade. Eles também serão removidos.', 'Remover', function () { removerEsp(i, true) });
     var e = espPorId(i);
+    if (!ok) return perguntar('Excluir especialidade?',
+      '"' + (e ? e.nome : '') + '" será excluída' + (usada ? ', junto com os lotes que usam ela.' : '.') + ' Isso não pode ser desfeito.',
+      'Excluir', function () { removerEsp(i, true) }, 'esp');
     if (e && e.imgId) { apagarImg(e.imgId); delete cacheImg[e.imgId] }
     estado.especialidades = estado.especialidades.filter(function (x) { return x.id !== i });
     estado.lotes = estado.lotes.filter(function (l) { return l.espId !== i });
@@ -743,8 +745,12 @@
       var rm = document.createElement('button');
       rm.className = 'icone-bt del'; rm.title = 'Remover lote'; rm.textContent = '✕';
       rm.onclick = function () {
-        estado.lotes = estado.lotes.filter(function (x) { return x.id !== l.id });
-        salvar(); pintarTudo(); aviso('Lote removido.');
+        perguntar('Excluir lote?',
+          'O lote de "' + (e ? e.nome : 'especialidade removida') + '" com ' + l.nomes.length + ' desbravador' + (l.nomes.length > 1 ? 'es' : '') + ' será excluído. Isso não pode ser desfeito.',
+          'Excluir', function () {
+            estado.lotes = estado.lotes.filter(function (x) { return x.id !== l.id });
+            salvar(); pintarTudo(); aviso('Lote removido.');
+          }, 'lote');
       };
       acoes.appendChild(rm);
 
@@ -1217,15 +1223,27 @@
   /* ═══════════ janela de confirmação ═══════════ */
 
   var aoConfirmar = null;
-  function perguntar (titulo, texto, rotulo, fn) {
+  /* "não perguntar novamente" fica guardado por tipo de pergunta */
+  var CHAVE_PREF = 'desbravadores-nao-perguntar';
+  function lerPref () { try { return JSON.parse(localStorage.getItem(CHAVE_PREF)) || {} } catch (e) { return {} } }
+  function gravarPref (k) { try { var p = lerPref(); p[k] = true; localStorage.setItem(CHAVE_PREF, JSON.stringify(p)) } catch (e) {} }
+  var chaveConf = null;
+  function perguntar (titulo, texto, rotulo, fn, chave) {
+    if (chave && lerPref()[chave]) return fn();
     id('mc-tit').textContent = titulo; id('mc-txt').textContent = texto; id('mc-ok').textContent = rotulo;
+    chaveConf = chave || null;
+    id('mc-ok').classList.toggle('perigo', rotulo === 'Excluir');
+    id('mc-lembrar').hidden = !chave; id('mc-nao-mais').checked = false;
     aoConfirmar = fn; id('modal-conf').hidden = false; id('mc-ok').focus();
   }
   function fecharConf () { id('modal-conf').hidden = true; aoConfirmar = null }
   id('mc-nao').addEventListener('click', fecharConf);
   id('modal-conf').addEventListener('click', function (e) { if (e.target === this) fecharConf() });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecharConf() });
-  id('mc-ok').addEventListener('click', function () { var f = aoConfirmar; fecharConf(); if (f) f() });
+  id('mc-ok').addEventListener('click', function () {
+    if (chaveConf && id('mc-nao-mais').checked) gravarPref(chaveConf);
+    var f = aoConfirmar; fecharConf(); if (f) f();
+  });
 
   /* ═══════════ opções em cartões no lugar das listas nativas ═══════════ */
 

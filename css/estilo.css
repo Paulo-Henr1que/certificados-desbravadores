@@ -522,3 +522,16 @@ textarea{
 .chip-lote{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; line-height:1.4 }
 .chip-lote .bolinha{ display:inline-block; vertical-align:-1px; margin-right:6px }
 .previa-barra{ grid-template-columns:minmax(0,1fr); min-width:0 }
+
+/* ═══════════ não perguntar novamente ═══════════ */
+.lembrar{ display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; color:var(--tinta-2); user-select:none }
+.lembrar input{ position:absolute; opacity:0; pointer-events:none }
+.caixinha{
+  flex:none; width:20px; height:20px; border-radius:6px; border:1.5px solid #B9C8DC; background:#fff;
+  display:grid; place-items:center; transition:background .15s, border-color .15s;
+}
+.caixinha::after{ content:''; width:5px; height:10px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg) translate(-1px,-1px); opacity:0 }
+.lembrar input:checked + .caixinha{ background:var(--azul); border-color:var(--azul) }
+.lembrar input:checked + .caixinha::after{ opacity:1 }
+.lembrar input:focus-visible + .caixinha{ box-shadow:0 0 0 3px rgba(0,75,135,.25) }
+#mc-ok.perigo{ background:var(--vermelho); color:#fff }
