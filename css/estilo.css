@@ -583,3 +583,58 @@ textarea{
   .selo{ width:80px; opacity:.14 } .s3,.s5{ display:none }
   .s4{ width:80px; left:-30px; right:auto }
 }
+
+/* ═══════════ fundo v2: loops fechados e suaves ═══════════
+   Cada animação começa e termina no mesmo ponto (sem "alternate"),
+   e se move em % do próprio elemento, não da tela: quando a barra
+   do navegador do celular some, nada pula. */
+.bolha{ filter:blur(60px); animation-timing-function:linear !important; animation-direction:normal !important }
+.b1{ background:var(--azul);     opacity:.55; animation:roda1 24s linear infinite }
+.b2{ background:var(--dourado);  opacity:.62; animation:roda2 20s linear infinite }
+.b3{ background:var(--vermelho); opacity:.34; animation:roda3 28s linear infinite }
+.b4{ background:#2F9BEA;         opacity:.40; animation:roda2 32s linear infinite reverse }
+@keyframes roda1{
+  0%  { transform:translate(0,0)       scale(1) }
+  25% { transform:translate(45%,20%)   scale(1.12) }
+  50% { transform:translate(70%,55%)   scale(.95) }
+  75% { transform:translate(20%,60%)   scale(1.08) }
+  100%{ transform:translate(0,0)       scale(1) }
+}
+@keyframes roda2{
+  0%  { transform:translate(0,0)       scale(1) }
+  25% { transform:translate(-40%,30%)  scale(.9) }
+  50% { transform:translate(-65%,-10%) scale(1.15) }
+  75% { transform:translate(-20%,-35%) scale(1) }
+  100%{ transform:translate(0,0)       scale(1) }
+}
+@keyframes roda3{
+  0%  { transform:translate(0,0)       scale(1) }
+  33% { transform:translate(50%,-40%)  scale(1.2) }
+  66% { transform:translate(-30%,-60%) scale(.95) }
+  100%{ transform:translate(0,0)       scale(1) }
+}
+/* as cores "respiram" de leve */
+/* (sem filtro animado no contêiner: pesaria no celular) */
+@keyframes respira{ 0%,100%{ filter:saturate(1) } 50%{ filter:saturate(1.35) } }
+
+/* escudos: balanço contínuo em seno, sem tranco */
+.selo{ opacity:.17; animation:balanca 16s ease-in-out infinite !important }
+@keyframes balanca{
+  0%  { transform:translateY(0)     rotate(-6deg) }
+  25% { transform:translateY(-18px) rotate(0deg) }
+  50% { transform:translateY(0)     rotate(6deg) }
+  75% { transform:translateY(18px)  rotate(0deg) }
+  100%{ transform:translateY(0)     rotate(-6deg) }
+}
+.s1{ animation-delay:0s !important }  .s2{ animation-delay:-3s !important }
+.s3{ animation-delay:-6s !important } .s4{ animation-delay:-9s !important }
+.s5{ animation-delay:-12s !important; animation-duration:19s !important }
+.s6{ top:80%; left:-20px; right:auto; bottom:auto; width:110px; animation-delay:-5s !important; animation-duration:18s !important }
+.s7{ top:30%; right:-18px; left:auto; bottom:auto; width:100px; animation-delay:-10s !important; animation-duration:21s !important }
+.s8{ top:4%;  left:-22px; right:auto; bottom:auto; width:95px;  animation-delay:-2s !important; animation-duration:17s !important }
+.s9{ top:40%; left:-26px; right:auto; bottom:auto; width:105px; animation-delay:-8s !important; animation-duration:20s !important }
+@media (max-width:700px){
+  .bolha{ filter:blur(45px) }
+  .s6,.s7{ width:72px } .s8,.s9{ display:none }
+}
+@media (prefers-reduced-motion:reduce){ .bolha, .selo, .fundo-vivo{ animation:none !important } }
