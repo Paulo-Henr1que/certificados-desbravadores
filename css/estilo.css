@@ -598,3 +598,6 @@ textarea{
   .gerar-cola{ margin-top:auto; position:sticky; bottom:18px }
 }
 .tirar-fundo{ justify-content:center; margin-top:10px; font-size:13.5px }
+/* boton e a opção de remover fundo, juntos na mesma coluna */
+.boton-col{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-width:0 }
+.boton-col .tirar-fundo{ margin-top:0; max-width:230px; text-align:left; font-size:13px; line-height:1.35 }
