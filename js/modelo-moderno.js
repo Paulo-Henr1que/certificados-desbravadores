@@ -109,12 +109,12 @@
   }
 
   /* faixa azul com pontas recortadas, como no modelo */
-  function faixa (ctx, W, H, cx, cy, w, h) {
+  function faixa (ctx, W, H, cx, cy, w, h, cor) {
     var x0 = (cx - w / 2) * W, x1 = (cx + w / 2) * W, y0 = (cy - h / 2) * H, y1 = (cy + h / 2) * H, n = 0.022 * W;
     ctx.beginPath();
     ctx.moveTo(x0, y0); ctx.lineTo(x1, y0); ctx.lineTo(x1 - n, cy * H); ctx.lineTo(x1, y1);
     ctx.lineTo(x0, y1); ctx.lineTo(x0 + n, cy * H); ctx.closePath();
-    ctx.fillStyle = AZUL; ctx.fill();
+    ctx.fillStyle = cor || AZUL; ctx.fill();
   }
 
   function espacado (ctx, txt, x, y, esp) {
@@ -186,8 +186,11 @@
     ctx.font = '800 ' + Math.round(0.125 * H) + 'px ' + TITULO;
     espacado(ctx, 'CERTIFICADO', 0.5 * W, 0.225 * H, 0.008 * W);
 
-    faixa(ctx, W, H, 0.5, 0.288, 0.33, 0.062);
-    ctx.fillStyle = '#FFFFFF';
+    faixa(ctx, W, H, 0.5, 0.288, 0.33, 0.062, d.cor);
+    // texto branco, ou escuro se a cor escolhida for clara (amarelo etc.)
+    var n = parseInt((d.cor || '#1F3C88').slice(1), 16);
+    var lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    ctx.fillStyle = lum > 0.62 ? '#1B1B1B' : '#FFFFFF';
     ctx.font = '700 ' + Math.round(0.040 * H) + 'px ' + TITULO;
     espacado(ctx, 'ESPECIALIDADE', 0.5 * W, 0.303 * H, 0.004 * W);
 
@@ -224,7 +227,7 @@
     if (emblema.naturalWidth) encaixar(ctx, emblema, 0.022 * W, 0.69 * H, 0.19 * W, 0.29 * H);
 
     // boton no lugar do QR code: quadro branco
-    quadroBoton(ctx, H, 0.765 * W, 0.735 * H, 0.213 * W, 0.23 * H, d);
+    quadroBoton(ctx, H, 0.765 * W, 0.735 * H, 0.213 * W, 0.23 * H, d, d.cor || '#08A008');
   };
 
   /* Modelo 2 "Compacto": mesmo estilo do grande, no formato da faixa
@@ -365,18 +368,30 @@
 
   /* boton discreto, sem quadro: encaixado numa área deitada do tamanho
      do emblema. Sem imagem, mostra só um oval tracejado deitado. */
-  function quadroBoton (ctx, H, bx, by, bw, bh, d) {
+  /* borda: anel fino colado por FORA do oval da imagem. A espessura e a
+     folga são proporcionais ao tamanho real da imagem encaixada, e a
+     imagem encolhe o necessário para o anel caber dentro da área. */
+  function quadroBoton (ctx, H, bx, by, bw, bh, d, borda) {
     if (d.botao) {
-      // recorta em oval: some o fundo branco de JPGs, como no modelo 1
-      var im = d.botao, e = Math.min(bw / im.naturalWidth, bh / im.naturalHeight);
+      var im = d.botao;
+      var t = borda ? Math.max(1.5, Math.min(bw, bh) * 0.03) : 0; // espessura
+      var folga = borda ? t * 0.6 : 0;                               // vão entre imagem e anel
+      var pad = t + folga;
+      var e = Math.min((bw - 2 * pad) / im.naturalWidth, (bh - 2 * pad) / im.naturalHeight);
       var iw = im.naturalWidth * e, ih = im.naturalHeight * e, ix = bx + (bw - iw) / 2, iy = by + (bh - ih) / 2;
+      var ox = ix + iw / 2, oy = iy + ih / 2;
+      // recorta em oval: some o fundo branco de JPGs, como no modelo 1
       ctx.save();
-      ctx.beginPath(); ctx.ellipse(ix + iw / 2, iy + ih / 2, iw / 2, ih / 2, 0, 0, Math.PI * 2); ctx.clip();
+      ctx.beginPath(); ctx.ellipse(ox, oy, iw / 2, ih / 2, 0, 0, Math.PI * 2); ctx.clip();
       ctx.drawImage(im, ix, iy, iw, ih);
       ctx.restore();
+      if (borda) {
+        ctx.strokeStyle = borda; ctx.lineWidth = t;
+        ctx.beginPath(); ctx.ellipse(ox, oy, iw / 2 + folga + t / 2, ih / 2 + folga + t / 2, 0, 0, Math.PI * 2); ctx.stroke();
+      }
       return;
     }
-    ctx.strokeStyle = 'rgba(120,130,150,.45)'; ctx.setLineDash([bh * 0.08, bh * 0.06]); ctx.lineWidth = Math.max(1, bh * 0.025);
+    ctx.strokeStyle = borda || 'rgba(120,130,150,.45)'; ctx.setLineDash([bh * 0.08, bh * 0.06]); ctx.lineWidth = Math.max(1, bh * 0.025);
     ctx.beginPath(); ctx.ellipse(bx + bw / 2, by + bh / 2, bw * 0.47, bh * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.setLineDash([]);
   }
