@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="css/estilo.css?v=24">
+<link rel="stylesheet" href="css/estilo.css?v=25">
 </head>
 <body>
 <div class="fundo-vivo" aria-hidden="true"><i class="bolha b1"></i><i class="bolha b2"></i><i class="bolha b3"></i><i class="bolha b4"></i><img class="selo s1" src="assets/desbravadores.svg" alt=""><img class="selo s2" src="assets/desbravadores.svg" alt=""><img class="selo s3" src="assets/desbravadores.svg" alt=""><img class="selo s4" src="assets/emblema-mundo.svg" alt=""><img class="selo s5" src="assets/emblema-mundo.svg" alt=""></div>
@@ -73,6 +73,7 @@
         <img id="soltar-prev" alt="" hidden>
         <span class="soltar-txt" id="soltar-txt"><b>Boton da especialidade</b>Clique ou arraste a imagem aqui<br><small>PNG ou JPG</small></span>
       </label>
+      <label class="lembrar tirar-fundo"><input type="checkbox" id="tirar-fundo" checked><span class="caixinha"></span>Remover o fundo da imagem automaticamente</label>
 
       <div class="form-pe">
         <button type="submit" class="bt bt-azul" id="bt-salvar-esp">Adicionar especialidade</button>
@@ -294,8 +295,8 @@
 
 <script src="vendor/jspdf.umd.min.js"></script>
 <script src="vendor/jszip.min.js"></script>
-<script src="js/modelo-moderno.js?v=3"></script>
-<script src="js/app.js?v=15"></script>
+<script src="js/modelo-moderno.js?v=7"></script>
+<script src="js/app.js?v=17"></script>
 <script>document.querySelectorAll(".ano-atual").forEach(function(e){e.textContent=new Date().getFullYear()})</script>
 </body>
 </html>

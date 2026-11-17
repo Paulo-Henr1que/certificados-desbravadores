@@ -138,7 +138,66 @@
 
   /* reduz a imagem enviada: 700 certificados com botons grandes
      entopem a memória e o arquivo final */
-  function prepararImagem (arquivo, ladoMax) {
+  /* Tira o fundo liso do boton: parte das bordas e apaga, por
+     preenchimento, os pixels parecidos com a cor do fundo (branco ou
+     outra cor lisa). Só o que encosta na borda some — o branco de dentro
+     do boton fica. Depois corta a sobra transparente em volta. */
+  function tirarFundo (c) {
+    var w = c.width, h = c.height, cx = c.getContext('2d');
+    var dados = cx.getImageData(0, 0, w, h), px = dados.data;
+    var cantos = [0, w - 1, (h - 1) * w, h * w - 1];
+    var jaTransparente = cantos.some(function (i) { return px[i * 4 + 3] < 20 });
+
+    if (!jaTransparente) {
+      // cor do fundo: média dos quatro cantos
+      var r = 0, g = 0, b = 0;
+      cantos.forEach(function (i) { r += px[i * 4]; g += px[i * 4 + 1]; b += px[i * 4 + 2] });
+      r /= 4; g /= 4; b /= 4;
+      var dist = function (i) {
+        var dr = px[i * 4] - r, dg = px[i * 4 + 1] - g, db = px[i * 4 + 2] - b;
+        return Math.sqrt(dr * dr + dg * dg + db * db);
+      };
+      var TOL = 48, BORDA = 90;
+      var visto = new Uint8Array(w * h), fila = new Int32Array(w * h), ini = 0, fim = 0;
+      var por = function (i) { if (!visto[i]) { visto[i] = 1; fila[fim++] = i } };
+      for (var x = 0; x < w; x++) { por(x); por((h - 1) * w + x) }
+      for (var y = 0; y < h; y++) { por(y * w); por(y * w + w - 1) }
+      while (ini < fim) {
+        var i = fila[ini++], dd = dist(i);
+        if (dd > BORDA) continue;
+        if (dd > TOL) { // contorno: meio transparente, borda suave
+          px[i * 4 + 3] = Math.min(px[i * 4 + 3], Math.round(255 * (dd - TOL) / (BORDA - TOL)));
+          continue;
+        }
+        px[i * 4 + 3] = 0;
+        var xx = i % w;
+        if (xx > 0) por(i - 1);
+        if (xx < w - 1) por(i + 1);
+        if (i >= w) por(i - w);
+        if (i < w * (h - 1)) por(i + w);
+      }
+      cx.putImageData(dados, 0, 0);
+    }
+
+    // corta a sobra transparente
+    var x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (var yy = 0; yy < h; yy++) for (var x2 = 0; x2 < w; x2++) {
+      if (px[(yy * w + x2) * 4 + 3] > 12) {
+        if (x2 < x0) x0 = x2; if (x2 > x1) x1 = x2;
+        if (yy < y0) y0 = yy; if (yy > y1) y1 = yy;
+      }
+    }
+    if (x1 < 0 || (x1 - x0) < w * 0.15 || (y1 - y0) < h * 0.15) return c; // apagou demais: deixa como veio
+    var m = 2;
+    x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m);
+    x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+    var out = document.createElement('canvas');
+    out.width = x1 - x0 + 1; out.height = y1 - y0 + 1;
+    out.getContext('2d').drawImage(c, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+    return out;
+  }
+
+  function prepararImagem (arquivo, ladoMax, semFundo) {
     return new Promise(function (ok, erro) {
       var leitor = new FileReader();
       leitor.onload = function () {
@@ -149,6 +208,7 @@
           var c = document.createElement('canvas');
           c.width = w; c.height = h;
           c.getContext('2d').drawImage(im, 0, 0, w, h);
+          if (semFundo) { try { c = tirarFundo(c) } catch (x) { /* se falhar, usa a imagem como veio */ } }
           ok(c.toDataURL('image/png'));
         };
         im.onerror = function () { erro(new Error('imagem inválida')) };
@@ -510,7 +570,7 @@
   }
 
   function limparFormEsp () {
-    editandoEsp = null; imgPendente = null;
+    editandoEsp = null; imgPendente = null; ultimoBoton = null;
     id('form-esp').reset();
     marcarCor('#08A008');
     mostrarSoltar(null, null);
@@ -623,9 +683,20 @@
     if (url) poe(url);
     else if (imgId) imagemDe(imgId).then(function (im) { if (im) poe(im.src) });
   }
+  /* opção "remover fundo": ligada por padrão, lembrada neste navegador */
+  var CHAVE_FUNDO = 'desbravadores-tirar-fundo';
+  function tirarFundoLigado () { return id('tirar-fundo').checked }
+  try { if (localStorage.getItem(CHAVE_FUNDO) === '0') id('tirar-fundo').checked = false } catch (e) {}
+  var ultimoBoton = null;
+  id('tirar-fundo').addEventListener('change', function () {
+    try { localStorage.setItem(CHAVE_FUNDO, this.checked ? '1' : '0') } catch (e) {}
+    if (ultimoBoton) receberBotao(ultimoBoton); // refaz a imagem que acabou de ser enviada
+  });
+
   function receberBotao (f) {
     if (!f) return;
-    prepararImagem(f, 520).then(function (url) {
+    ultimoBoton = f;
+    prepararImagem(f, 520, tirarFundoLigado()).then(function (url) {
       imgPendente = url; mostrarSoltar(url);
     }).catch(function () { aviso('Não consegui ler essa imagem.', true) });
   }
@@ -643,7 +714,7 @@
   id('logo-img').addEventListener('change', function () {
     var f = this.files && this.files[0];
     if (!f) return;
-    prepararImagem(f, 420).then(function (url) {
+    prepararImagem(f, 420, tirarFundoLigado()).then(function (url) {
       return guardarImg('logo', url);
     }).then(function () {
       estado.temLogo = true; delete cacheImg.logo;

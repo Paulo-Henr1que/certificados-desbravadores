@@ -192,37 +192,28 @@
     espacado(ctx, 'ESPECIALIDADE', 0.5 * W, 0.303 * H, 0.004 * W);
 
     // texto corrido
-    var tam = Math.round(0.034 * H), largMax = 0.80 * W;
-    var nome = (d.nome || '').toUpperCase();
-    var tamNome = 1.55;
-    ctx.font = '700 ' + Math.round(tam * tamNome) + 'px ' + SANS;
-    // nome nunca maior que a linha: encolhe e, se preciso, abrevia
-    var limiteNome = 0.62 * W;
-    if (ctx.measureText(nome).width > limiteNome) {
-      if (nomeQueCabe) nome = nomeQueCabe(ctx, nome, limiteNome * 0.92, tam * 1.05 / 0.72);
-      while (tamNome > 1.05) {
-        ctx.font = '700 ' + Math.round(tam * tamNome) + 'px ' + SANS;
-        if (ctx.measureText(nome).width <= limiteNome) break;
-        tamNome -= 0.05;
-      }
-    }
+    var largMax = 0.80 * W;
     var esp = (d.especialidade || '').toUpperCase();
-    var n = paragrafo(ctx, [
-      { t: 'Certificamos que ' },
-      { t: nome, b: true, k: tamNome, inteiro: true },
-      { t: ' concluiu a Especialidade de ' },
-      { t: esp, b: true, inteiro: esp.length < 40 },
-      { t: ', do Ministério dos DESBRAVADORES, válida em todo o território da Divisão Sul-Americana da Igreja Adventista do Sétimo Dia' },
-    ], 0.5 * W, 0.47 * H, largMax, tam, 0.052 * H);
+    var r = textoPrincipal(ctx, {
+      nome: (d.nome || '').replace(/\s+/g, ' ').trim().toUpperCase(), kNome: 1.55,
+      tam: Math.round(0.034 * H), entre: 0.052 * H, cx: 0.5 * W, y: 0.47 * H, largMax: largMax, maxLinhas: 5,
+      trechos: function (nomeT) {
+        return [
+          { t: 'Certificamos que ' }, nomeT, { t: ' concluiu a Especialidade de ' },
+          { t: esp, b: true, inteiro: esp.length < 40 },
+          { t: ', do Ministério dos DESBRAVADORES, válida em todo o território da Divisão Sul-Americana da Igreja Adventista do Sétimo Dia' },
+        ];
+      },
+    });
 
     // data
-    var yData = 0.47 * H + n * 0.052 * H + 0.035 * H;
+    var yData = 0.47 * H + r.linhas * r.entre + 0.035 * H;
     paragrafo(ctx, [{ t: 'Concluído em ' }, { t: d.data || '___ / ___ / ______', b: true, inteiro: true }],
-      0.5 * W, Math.min(yData, 0.70 * H), largMax, Math.round(0.028 * H), 0.04 * H);
+      0.5 * W, Math.min(yData, 0.745 * H), largMax, Math.round(0.028 * H), 0.04 * H);
 
     // duas assinaturas
     ctx.strokeStyle = '#222'; ctx.lineWidth = Math.max(1, 0.0022 * H);
-    [[0.285, 0.475, 'Diretor'], [0.525, 0.715, 'Instrutor(a)']].forEach(function (a) {
+    [[0.255, 0.455, 'Diretor(a)'], [0.495, 0.695, 'Instrutor(a)']].forEach(function (a) {
       ctx.beginPath(); ctx.moveTo(a[0] * W, 0.815 * H); ctx.lineTo(a[1] * W, 0.815 * H); ctx.stroke();
       ctx.fillStyle = TINTA; ctx.textAlign = 'center';
       ctx.font = '700 ' + Math.round(0.027 * H) + 'px ' + SANS;
@@ -233,19 +224,7 @@
     if (emblema.naturalWidth) encaixar(ctx, emblema, 0.022 * W, 0.69 * H, 0.19 * W, 0.29 * H);
 
     // boton no lugar do QR code: quadro branco
-    var bx = 0.815 * W, by = 0.735 * H, bw = 0.155 * W, bh = 0.235 * H;
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.12)'; ctx.shadowBlur = 0.02 * H; ctx.shadowOffsetY = 0.004 * H;
-    retArred(ctx, bx, by, bw, bh, 0.012 * H);
-    ctx.fillStyle = '#FFFFFF'; ctx.fill();
-    ctx.restore();
-    if (d.botao) {
-      encaixar(ctx, d.botao, bx + 0.08 * bw, by + 0.06 * bh, bw * 0.84, bh * 0.88);
-    } else {
-      ctx.strokeStyle = '#D5DAE2'; ctx.setLineDash([0.01 * H, 0.008 * H]); ctx.lineWidth = 0.003 * H;
-      ctx.beginPath(); ctx.ellipse(bx + bw / 2, by + bh / 2, bw * 0.36, bh * 0.4, 0, 0, Math.PI * 2); ctx.stroke();
-      ctx.setLineDash([]);
-    }
+    quadroBoton(ctx, H, 0.79 * W, 0.745 * H, 0.185 * W, 0.20 * H, d);
   };
 
   /* Modelo 2 "Compacto": mesmo estilo do grande, no formato da faixa
@@ -289,7 +268,7 @@
     P([[-0.0001, 0.70], [-0.0001, 1], [-0.30, 1]], OURO);
     P([[-0.0001, 0.86], [-0.0001, 1], [-0.12, 1]], AZUL);
 
-    var cx = 0.425 * W; // centro da área de texto (o boton fica à direita)
+    var cx = 0.5 * W; // centro da área de texto
     ctx.textBaseline = 'alphabetic';
 
     ctx.fillStyle = VERM;
@@ -307,60 +286,37 @@
     espacado(ctx, 'ESPECIALIDADE', cx, fy + 0.019 * H, 0.007 * H);
 
     // texto: nome e especialidade em destaque
-    var tam = Math.round(0.056 * H), largMax = 0.56 * W;
-    var nome = (d.nome || '').toUpperCase(), kNome = 1.35;
-    var limiteNome = 0.36 * W;
-    ctx.font = '700 ' + Math.round(tam * kNome) + 'px ' + SANS;
-    if (ctx.measureText(nome).width > limiteNome) {
-      if (nomeQueCabe) nome = nomeQueCabe(ctx, nome, limiteNome * 0.92, tam * 1.0 / 0.72);
-      while (kNome > 1.0) {
-        ctx.font = '700 ' + Math.round(tam * kNome) + 'px ' + SANS;
-        if (ctx.measureText(nome).width <= limiteNome) break;
-        kNome -= 0.05;
-      }
-    }
+    var largMax = 0.60 * W;
     var esp = (d.especialidade || '').toUpperCase();
-    var corEsp = escurecer ? escurecer(d.cor || '#08A008') : TINTA;
-    var linhas = paragrafoCor(ctx, [
-      { t: 'Certificamos que ' },
-      { t: nome, b: true, k: kNome, inteiro: true },
-      { t: ' concluiu a Especialidade de ' },
-      { t: esp, b: true, inteiro: esp.length < 34, cor: corEsp },
-    ], cx, 0.525 * H, largMax, tam, 0.085 * H);
+    var r = textoPrincipal(ctx, {
+      nome: (d.nome || '').replace(/\s+/g, ' ').trim().toUpperCase(), kNome: 1.3,
+      tam: Math.round(0.052 * H), entre: 0.075 * H, cx: cx, y: 0.50 * H, largMax: largMax, maxLinhas: 3,
+      trechos: function (nomeT) {
+        return [{ t: 'Certificamos que ' }, nomeT, { t: ' concluiu a Especialidade de ' }, { t: esp, b: true, inteiro: esp.length < 34 }];
+      },
+    });
 
     paragrafoCor(ctx, [{ t: 'Concluído em ' }, { t: d.data || '___ / ___ / ______', b: true, inteiro: true }],
-      cx, Math.min(0.525 * H + linhas * 0.085 * H + 0.01 * H, 0.725 * H), largMax, Math.round(0.046 * H), 0.07 * H);
+      cx, Math.min(0.50 * H + r.linhas * r.entre + 0.01 * H, 0.745 * H), largMax, Math.round(0.044 * H), 0.07 * H);
 
-    // assinatura única
+    // duas assinaturas
     ctx.strokeStyle = '#222'; ctx.lineWidth = Math.max(1, 0.005 * H);
-    ctx.beginPath(); ctx.moveTo(cx - 0.10 * W, 0.85 * H); ctx.lineTo(cx + 0.10 * W, 0.85 * H); ctx.stroke();
-    ctx.fillStyle = TINTA; ctx.textAlign = 'center';
-    ctx.font = '700 ' + Math.round(0.046 * H) + 'px ' + SANS;
-    ctx.fillText('Instrutor@', cx, 0.925 * H);
+    [[-0.235, -0.025, 'Diretor(a)'], [0.025, 0.235, 'Instrutor(a)']].forEach(function (a) {
+      ctx.beginPath(); ctx.moveTo(cx + a[0] * W, 0.86 * H); ctx.lineTo(cx + a[1] * W, 0.86 * H); ctx.stroke();
+      ctx.fillStyle = TINTA; ctx.textAlign = 'center';
+      ctx.font = '700 ' + Math.round(0.044 * H) + 'px ' + SANS;
+      ctx.fillText(a[2], cx + ((a[0] + a[1]) / 2) * W, 0.93 * H);
+    });
 
     // emblema
     if (emblema.naturalWidth) encaixar(ctx, emblema, 0.03 * u, 0.56 * u, 0.36 * u, 0.40 * u);
 
-    // boton: quadro branco à direita, borda na cor da especialidade
-    var bh = 0.68 * H, bw = 0.60 * H, bx = W - bw - 0.13 * H, by = 0.16 * H;
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.14)'; ctx.shadowBlur = 0.04 * H; ctx.shadowOffsetY = 0.008 * H;
-    retArred(ctx, bx, by, bw, bh, 0.03 * H);
-    ctx.fillStyle = '#FFFFFF'; ctx.fill();
-    ctx.restore();
-    ctx.strokeStyle = d.cor || '#08A008'; ctx.lineWidth = 0.012 * H;
-    retArred(ctx, bx, by, bw, bh, 0.03 * H); ctx.stroke();
-    if (d.botao) {
-      encaixar(ctx, d.botao, bx + 0.07 * bw, by + 0.06 * bh, bw * 0.86, bh * 0.88);
-    } else {
-      ctx.strokeStyle = '#D5DAE2'; ctx.setLineDash([0.02 * H, 0.016 * H]); ctx.lineWidth = 0.006 * H;
-      ctx.beginPath(); ctx.ellipse(bx + bw / 2, by + bh / 2, bw * 0.36, bh * 0.4, 0, 0, Math.PI * 2); ctx.stroke();
-      ctx.setLineDash([]);
-    }
+    // boton: espelho do emblema, no canto de baixo à direita
+    quadroBoton(ctx, H, W - 0.45 * u, 0.62 * u, 0.42 * u, 0.32 * u, d);
   };
 
   /* igual ao paragrafo(), mas cada trecho pode ter cor própria */
-  function paragrafoCor (ctx, trechos, cx, y, largMax, tam, entre) {
+  function paragrafoCor (ctx, trechos, cx, y, largMax, tam, entre, seco) {
     var fonte = function (tr) { return (tr.b ? '700 ' : '400 ') + Math.round(tam * (tr.k || 1)) + 'px ' + SANS };
     var pal = [];
     trechos.forEach(function (tr) {
@@ -378,12 +334,51 @@
       if (branco && !linhas[L].length) return;
       linhas[L].push(p); larg[L] += p.w;
     });
+    if (seco) return linhas.length;
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     linhas.forEach(function (ln, i) {
       var x = cx - larg[i] / 2;
       ln.forEach(function (p) { ctx.font = p.f; ctx.fillStyle = p.c || TINTA; ctx.fillText(p.t, x, y + i * entre); x += p.w });
     });
     return linhas.length;
+  }
+
+  /* Texto principal com o NOME COMPLETO, sem abreviar.
+     O nome fica numa peça só enquanto cabe na linha; se não couber,
+     quebra entre as palavras. Se o parágrafo passar de maxLinhas,
+     a letra diminui um pouco de cada vez. */
+  function textoPrincipal (ctx, o) {
+    var tam = o.tam, entre = o.entre, linhas = 0, trechos;
+    for (var passo = 0; passo < 8; passo++) {
+      var k = o.kNome;
+      ctx.font = '700 ' + Math.round(tam * k) + 'px ' + SANS;
+      while (k > 1 && ctx.measureText(o.nome).width > o.largMax) { k -= 0.05; ctx.font = '700 ' + Math.round(tam * k) + 'px ' + SANS }
+      var cabe = ctx.measureText(o.nome).width <= o.largMax;
+      trechos = o.trechos({ t: o.nome, b: true, k: k, inteiro: cabe });
+      linhas = paragrafoCor(ctx, trechos, o.cx, o.y, o.largMax, tam, entre, true);
+      if (linhas <= o.maxLinhas) break;
+      tam *= 0.95; entre *= 0.95;
+    }
+    paragrafoCor(ctx, trechos, o.cx, o.y, o.largMax, tam, entre);
+    return { linhas: linhas, entre: entre };
+  }
+
+  /* boton discreto, sem quadro: encaixado numa área deitada do tamanho
+     do emblema. Sem imagem, mostra só um oval tracejado deitado. */
+  function quadroBoton (ctx, H, bx, by, bw, bh, d) {
+    if (d.botao) {
+      // recorta em oval: some o fundo branco de JPGs, como no modelo 1
+      var im = d.botao, e = Math.min(bw / im.naturalWidth, bh / im.naturalHeight);
+      var iw = im.naturalWidth * e, ih = im.naturalHeight * e, ix = bx + (bw - iw) / 2, iy = by + (bh - ih) / 2;
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(ix + iw / 2, iy + ih / 2, iw / 2, ih / 2, 0, 0, Math.PI * 2); ctx.clip();
+      ctx.drawImage(im, ix, iy, iw, ih);
+      ctx.restore();
+      return;
+    }
+    ctx.strokeStyle = 'rgba(120,130,150,.45)'; ctx.setLineDash([bh * 0.08, bh * 0.06]); ctx.lineWidth = Math.max(1, bh * 0.025);
+    ctx.beginPath(); ctx.ellipse(bx + bw / 2, by + bh / 2, bw * 0.47, bh * 0.45, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
   }
 
   window.emblemaModerno = emblema;
