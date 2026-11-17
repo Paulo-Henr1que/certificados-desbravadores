@@ -501,3 +501,24 @@ textarea{
   .opcao b{ font-size:13px }
   .opcao small{ font-size:11px }
 }
+
+/* ═══════════ listas recolhíveis ═══════════ */
+.ver-mais{
+  display:flex; align-items:center; justify-content:center; gap:6px; width:100%;
+  margin-top:10px; padding:11px; border-radius:12px; cursor:pointer;
+  border:1.5px dashed var(--linha); background:transparent; color:var(--azul);
+  font:600 14px 'Outfit',sans-serif; transition:background .15s, border-color .15s;
+}
+.ver-mais:hover{ background:#F5F8FC; border-color:#B9C8DC }
+.ver-mais svg{ transition:transform .2s var(--ease) }
+.ver-mais.aberto svg{ transform:rotate(180deg) }
+.chips-lote{ flex-wrap:wrap; overflow:visible }
+.chips-lote + .ver-mais{ margin-top:2px; padding:8px }
+.chip-lote.on .bolinha{ box-shadow:0 0 0 2px #fff }
+.cartao-lote .meio b{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.cartao-lote .etiqueta{ font-size:11.5px; padding:2px 9px }
+.cartao-lote .meio small{ white-space:nowrap }
+.chip-lote{ max-width:100%; min-width:0 }
+.chip-lote{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block; line-height:1.4 }
+.chip-lote .bolinha{ display:inline-block; vertical-align:-1px; margin-right:6px }
+.previa-barra{ grid-template-columns:minmax(0,1fr); min-width:0 }

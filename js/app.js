@@ -417,6 +417,24 @@
   var editandoEsp = null;
   var imgPendente = null;
 
+  /* listas longas ficam recolhidas, com "Ver mais" */
+  var abertas = {};
+  function recolher (el, chave, limite, rotulo) {
+    var prox = el.nextElementSibling;
+    if (prox && prox.classList.contains('ver-mais')) prox.remove();
+    var itens = [].slice.call(el.children);
+    var sobra = itens.length - limite;
+    itens.forEach(function (it, i) { it.hidden = !abertas[chave] && i >= limite });
+    if (sobra <= 0) return;
+    var bt = document.createElement('button');
+    bt.type = 'button';
+    bt.className = 'ver-mais' + (abertas[chave] ? ' aberto' : '');
+    bt.innerHTML = '<span></span><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>';
+    bt.firstChild.textContent = abertas[chave] ? 'Ver menos' : 'Ver mais ' + sobra + ' ' + rotulo;
+    bt.addEventListener('click', function () { abertas[chave] = !abertas[chave]; recolher(el, chave, limite, rotulo) });
+    el.parentNode.insertBefore(bt, el.nextSibling);
+  }
+
   function pintarEspecialidades () {
     var ul = id('lista-esp');
     ul.innerHTML = '';
@@ -462,6 +480,7 @@
       li.appendChild(mini); li.appendChild(bol); li.appendChild(meio); li.appendChild(acoes);
       ul.appendChild(li);
     });
+    recolher(ul, 'esp', 3, 'especialidades');
 
     pintarCombo();
   }
@@ -709,9 +728,11 @@
       var b = document.createElement('b');
       b.textContent = e ? e.nome : '(especialidade removida)';
       var s = document.createElement('small');
-      s.textContent = l.nomes.length + ' desbravador' + (l.nomes.length > 1 ? 'es' : '') +
-        ' · ' + textoData(l);
-      meio.appendChild(b); meio.appendChild(s);
+      s.textContent = l.nomes.length + ' desbravador' + (l.nomes.length > 1 ? 'es' : '');
+      var dt = document.createElement('small');
+      dt.className = 'lote-data';
+      dt.textContent = l.tipoData === 'branco' ? 'Data em branco' : 'Data: ' + textoData(l);
+      meio.appendChild(b); meio.appendChild(s); meio.appendChild(dt);
 
       var tag = document.createElement('span');
       if (e && !e.imgId) { tag.className = 'etiqueta falta'; tag.textContent = 'sem boton' }
@@ -727,9 +748,11 @@
       };
       acoes.appendChild(rm);
 
-      li.appendChild(bol); li.appendChild(meio); li.appendChild(tag); li.appendChild(acoes);
+      b.appendChild(tag);
+      li.appendChild(bol); li.appendChild(meio); li.appendChild(acoes);
       ul.appendChild(li);
     });
+    recolher(ul, 'lotes', 3, 'lotes');
   }
 
   /* ═══════════ importação em massa ═══════════ */
@@ -887,13 +910,14 @@
       b.type = 'button';
       b.className = 'chip-lote' + (l.id === sel.value ? ' on' : '');
       b.innerHTML = '<span class="bolinha" style="background:' + (e ? e.cor : '#ccc') + '"></span>';
-      b.appendChild(document.createTextNode((e ? e.nome : '—') + ' · ' + l.nomes[0] + (l.nomes.length > 1 ? ' +' + (l.nomes.length - 1) : '')));
+      b.appendChild(document.createTextNode((e ? e.nome : '—') + ' · ' + l.nomes[0].split(' ')[0] + (l.nomes.length > 1 ? ' +' + (l.nomes.length - 1) : '')));
       b.addEventListener('click', function () {
         sel.value = l.id; sel.dispatchEvent(new Event('change'));
         $$('.chip-lote').forEach(function (o) { o.classList.toggle('on', o === b) });
       });
       chips.appendChild(b);
     });
+    recolher(chips, 'chips', 4, 'lotes');
   }
 
   function loteDaPrevia () {
